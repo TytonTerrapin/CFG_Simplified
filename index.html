@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFG Simplifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>CFG Simplifier</h1>
+            <p>Interactive Theory & Visualization of Context-Free Grammar Simplification</p>
+        </header>
+
+        <main id="app-content">
+            
+            <!-- THEORY SECTION -->
+            <section class="theory-section">
+                <div class="theory-header">
+                    <h2>Theory of CFG Simplification</h2>
+                    <p>To safely minimize a Context-Free Grammar without changing the language it generates, we apply systematic algorithms in a specific pipeline order. Explore the theory below before trying it yourself.</p>
+                </div>
+                <div class="theory-grid">
+                    <div class="theory-card">
+                        <div class="theory-icon">1</div>
+                        <h3>Useless Symbols</h3>
+                        <p>We eliminate variables that don't produce outcomes.<br><br>
+                        <strong>Phase 1: Non-Productive.</strong> Remove variables that never derive a string consisting only of terminals.<br>
+                        <strong>Phase 2: Unreachable.</strong> From the Start symbol (S), build a reachable graph and remove anything disconnected.</p>
+                    </div>
+                    <div class="theory-card">
+                        <div class="theory-icon">2</div>
+                        <h3>Null Productions</h3>
+                        <p>We remove productions that derive the empty string (<code>?</code> or <code>ε</code>).<br><br>
+                        First, we identify "nullable" variables. Then, for any rule containing these variables, we generate combinations of sub-rules substituting those variables with the empty string, allowing us to safely omit <code>A → ?</code>.</p>
+                    </div>
+                    <div class="theory-card">
+                        <div class="theory-icon">3</div>
+                        <h3>Unit Productions</h3>
+                        <p>We streamline the grammar by collapsing direct variable-to-variable chains (e.g., <code>A → B</code>).<br><br>
+                        We calculate a "derivation closure" for every variable, and directly substitute <code>B</code>'s non-unit derivations into <code>A</code>, completely removing the intermediate step.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 0: INPUT -->
+            <section class="panel" id="step-0">
+                <h2>Define Your Context-Free Grammar</h2>
+                <p class="subtitle">Provide your rules using the text area or the dynamic rule builder. Use <code>?</code> or <code>''</code> for empty productions.</p>
+                
+                <div class="input-methods-grid">
+                    <div class="input-pane">
+                        <h3>Text Editor</h3>
+                        <textarea id="cfg-input" spellcheck="false" placeholder="Example:
+S -> ABaC
+A -> BC
+B -> b | ?
+C -> D | ?
+D -> d"></textarea>
+                        
+                        <div class="controls mt-2" style="display:flex; gap:10px; align-items:center;">
+                            <select id="example-select" class="builder-input" style="flex:1;">
+                                <option value="general">General Mixed Pipeline</option>
+                                <option value="nulls">Heavy Nulls (Cascading)</option>
+                                <option value="units">Deep Unit Chains</option>
+                                <option value="useless">Unreachable & Non-Productive</option>
+                            </select>
+                            <button class="btn btn-secondary" id="btn-load-example">Load</button>
+                            <button class="btn btn-secondary" id="btn-clear" style="border-color: var(--danger); color: var(--danger);">Clear</button>
+                        </div>
+
+                    </div>
+
+                    <div class="input-pane builder-pane">
+                        <h3>Dynamic Rule Builder</h3>
+                        <div class="builder-description">
+                            Automatically append rules to the text editor. Space out multiple RHS options with a pipe <code>|</code>.
+                        </div>
+                        <div class="builder-row">
+                            <input type="text" id="builder-lhs" placeholder="LHS (e.g. S)" maxlength="1" class="builder-input lhs-input">
+                            <span class="arrow-icon">→</span>
+                            <input type="text" id="builder-rhs" placeholder="RHS (e.g. aB | ?)" class="builder-input rhs-input">
+                        </div>
+                        <div class="builder-actions">
+                            <button class="btn btn-secondary w-full" id="btn-add-rule">Add Rule to Editor</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-actions center-actions" style="border-top: none; padding-top: 0;">
+                    <button class="btn btn-primary btn-large" id="btn-start">Execute Simplification Pipeline</button>
+                </div>
+            </section>
+
+            <!-- SCRolLABLE PIPELINE RESULTS -->
+            <div id="pipeline-results" class="hidden">
+                <div class="pipeline-header">
+                    <h2>Pipeline Execution Trace</h2>
+                    <p>Scroll down to review the Before & After states and visualizations for each algorithmic step.</p>
+                </div>
+
+                <!-- STEP 1: INITIAL USELESS SYMBOLS -->
+                <section class="panel" id="step-1">
+                    <h2>Stage 1: Useless Symbols (Initial Sweep)</h2>
+                    <p class="subtitle">Eliminates non-productive symbols and symbols unreachable from the start state.</p>
+                    <div class="stage-stats" id="u1-stats"></div>
+                    
+                    <div class="dashboard-grid full-width">
+                        <div class="logs-pane">
+                            <h3>Algorithmic Traces</h3>
+                            <div id="u1-logs" class="logs-content scrollbar"></div>
+                        </div>
+                        <div class="visuals-pane">
+                            <div class="graph-wrapper">
+                                <h3>Dependency Diff Graph</h3>
+                                <div id="u1-network" class="network-canvas"></div>
+                            </div>
+                            <div class="state-container">
+                                <div class="grammar-col">
+                                    <h4>Before Stage 1</h4>
+                                    <div id="u1-before" class="grammar-display scrollbar"></div>
+                                </div>
+                                <div class="grammar-col">
+                                    <h4>After Stage 1</h4>
+                                    <div id="u1-after" class="grammar-display scrollbar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 2: NULL PRODUCTIONS -->
+                <section class="panel" id="step-2">
+                    <h2>Stage 2: Null Productions Removal</h2>
+                    <p class="subtitle">Identifies nullable non-terminals (deriving <code>?</code>) and dynamically generates alternative non-null productions.</p>
+                    <div class="stage-stats" id="null-stats"></div>
+                    
+                    <div class="dashboard-grid full-width">
+                        <div class="logs-pane">
+                            <h3>Algorithmic Traces</h3>
+                            <div id="null-logs" class="logs-content scrollbar"></div>
+                        </div>
+                        <div class="visuals-pane">
+                            <div class="graph-wrapper">
+                                <h3>Dependency Diff Graph</h3>
+                                <div id="null-network" class="network-canvas"></div>
+                            </div>
+                            <div class="state-container">
+                                <div class="grammar-col">
+                                    <h4>Before Stage 2</h4>
+                                    <div id="null-before" class="grammar-display scrollbar"></div>
+                                </div>
+                                <div class="grammar-col">
+                                    <h4>After Stage 2</h4>
+                                    <div id="null-after" class="grammar-display scrollbar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 3: UNIT PRODUCTIONS -->
+                <section class="panel" id="step-3">
+                    <h2>Stage 3: Unit Productions Removal</h2>
+                    <p class="subtitle">Eliminates <code>A → B</code> transitions by determining derivation closures and making direct substitutions.</p>
+                    <div class="stage-stats" id="unit-stats"></div>
+                    
+                    <div class="dashboard-grid full-width">
+                        <div class="logs-pane">
+                            <h3>Algorithmic Traces</h3>
+                            <div id="unit-logs" class="logs-content scrollbar"></div>
+                        </div>
+                        <div class="visuals-pane">
+                            <div class="graph-wrapper">
+                                <h3>Dependency Diff Graph</h3>
+                                <div id="unit-network" class="network-canvas"></div>
+                            </div>
+                            <div class="state-container">
+                                <div class="grammar-col">
+                                    <h4>Before Stage 3</h4>
+                                    <div id="unit-before" class="grammar-display scrollbar"></div>
+                                </div>
+                                <div class="grammar-col">
+                                    <h4>After Stage 3</h4>
+                                    <div id="unit-after" class="grammar-display scrollbar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 4: FINAL USELESS SYMBOLS -->
+                <section class="panel" id="step-4">
+                    <h2>Stage 4: Final Cleanup (Emerging Useless Symbols)</h2>
+                    <p class="subtitle">A final sweep to remove any symbols that became unreachable or non-productive during the null/unit phases.</p>
+                    <div class="stage-stats" id="u2-stats"></div>
+                    
+                    <div class="dashboard-grid full-width">
+                        <div class="logs-pane">
+                            <h3>Algorithmic Traces</h3>
+                            <div id="u2-logs" class="logs-content scrollbar"></div>
+                        </div>
+                        <div class="visuals-pane">
+                            <div class="graph-wrapper">
+                                <h3>Dependency Diff Graph</h3>
+                                <div id="u2-network" class="network-canvas"></div>
+                            </div>
+                            <div class="state-container">
+                                <div class="grammar-col">
+                                    <h4>Before Stage 4</h4>
+                                    <div id="u2-before" class="grammar-display scrollbar"></div>
+                                </div>
+                                <div class="grammar-col">
+                                    <h4>After Stage 4</h4>
+                                    <div id="u2-after" class="grammar-display scrollbar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 5: RESULT -->
+                <section class="panel" id="step-5">
+                    <h2>Simplification Complete</h2>
+                    <div class="success-banner">
+                        <span class="icon-success">✔</span>
+                        <p>The strictly minimized, equivalent CFG is ready. Compare your original input with the final optimized grammar.</p>
+                    </div>
+                    <div class="stage-stats" id="final-stats" style="justify-content: center; margin-bottom: 2rem;"></div>
+                    
+                    <div class="final-compare-grid">
+                        <div class="grammar-box">
+                            <h3>Original Grammar</h3>
+                            <div id="final-original" class="grammar-display scrollbar"></div>
+                        </div>
+                        <div class="arrow-container">
+                            <span class="transform-arrow">➔</span>
+                        </div>
+                        <div class="grammar-box glow-box">
+                            <h3>Fully Simplified CFG</h3>
+                            <div id="final-simplified" class="grammar-display scrollbar"></div>
+                        </div>
+                    </div>
+
+                    <div class="dynamic-graph-viewer">
+                        <h3>Interactive Transformation Replay</h3>
+                        <div class="playback-controls">
+                            <button id="btn-prev-graph" class="btn btn-secondary">◀ Prev Stage</button>
+                            <span id="graph-stage-label">Stage 0: Original Grammar</span>
+                            <button id="btn-next-graph" class="btn btn-secondary">Next Stage ▶</button>
+                        </div>
+                        <div id="dynamic-network" class="network-canvas" style="height: 450px;"></div>
+                    </div>
+
+                    <div class="panel-actions center-actions">
+                        <button class="btn btn-primary btn-large" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Back to Top</button>
+                    </div>
+                </section>
+            </div>
+            
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
