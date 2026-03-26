@@ -48,16 +48,11 @@ const DOM = {
 
 const STAGE_LABELS = [
     "Stage 0: Original Grammar",
-    "Stage 1: Initial Useless Symbols (Intermediate Stage)",
-    "Stage 1: Initial Useless Symbols (Result)",
-    "Stage 2: Null Productions (Intermediate Stage)",
-    "Stage 2: Null Productions (Result)",
-    "Stage 3: Unit Productions (Intermediate Stage)",
-    "Stage 3: Unit Productions (Result)",
-    "Stage 4: Final Useless Symbols (Intermediate Stage)",
-    "Stage 4: Final Useless Symbols (Result)"
+    "Stage 1: Initial Useless Symbols Diff",
+    "Stage 2: Null Productions Diff",
+    "Stage 3: Unit Productions Diff",
+    "Stage 4: Final Useless Symbols Diff"
 ];
-const TOTAL_STAGES = STAGE_LABELS.length - 1;
 let currentPlaybackStage = 0;
 
 const EXAMPLES = {
@@ -829,22 +824,12 @@ document.addEventListener('click', (e) => {
 function updateDynamicPlayback() {
     DOM.graphStageLabel.innerText = STAGE_LABELS[currentPlaybackStage];
     DOM.btnPrevGraph.disabled = currentPlaybackStage === 0;
-    DOM.btnNextGraph.disabled = currentPlaybackStage === TOTAL_STAGES;
+    DOM.btnNextGraph.disabled = currentPlaybackStage === 4;
     
     if (currentPlaybackStage === 0) {
-        // Stage 0: Original Grammar
         updateMorphingGraph(pipelineStates[0].grammar, pipelineStates[0].grammar);
     } else {
-        const pipelineIndex = Math.ceil(currentPlaybackStage / 2);
-        const isIntermediate = currentPlaybackStage % 2 === 1;
-
-        if (isIntermediate) {
-            // Intermediate (Diff): Previous Result -> Current Result
-            updateMorphingGraph(pipelineStates[pipelineIndex - 1].grammar, pipelineStates[pipelineIndex].grammar);
-        } else {
-            // Result (Clean): Current Result -> Current Result
-            updateMorphingGraph(pipelineStates[pipelineIndex].grammar, pipelineStates[pipelineIndex].grammar);
-        }
+        updateMorphingGraph(pipelineStates[currentPlaybackStage - 1].grammar, pipelineStates[currentPlaybackStage].grammar);
     }
 }
 
@@ -855,7 +840,7 @@ DOM.btnPrevGraph.addEventListener('click', () => {
     }
 });
 DOM.btnNextGraph.addEventListener('click', () => {
-    if (currentPlaybackStage < TOTAL_STAGES) {
+    if (currentPlaybackStage < 4) {
         currentPlaybackStage++;
         updateDynamicPlayback();
     }
