@@ -5,6 +5,8 @@
 CFG Simplifier is an interactive, web-based tool designed to visualize and perform the step-by-step simplification of Context-Free Grammars (CFGs). It acts as both an educational platform for understanding the theory of formal languages and a practical utility for generating strict, minimized, and equivalent grammars.
 
 Live demo: https://tytonterrapin.github.io/CFG_Simplified/
+
+
 Link 2: https://cfg-simplified.vercel.app/
 
 Deployment: Hosted using Vercel for zero-config static deployment from this repository. Changes pushed to the main branch are auto-deployed.
