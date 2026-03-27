@@ -48,10 +48,10 @@ const DOM = {
 
 const STAGE_LABELS = [
     "Stage 0: Original Grammar",
-    "Stage 1: Initial Useless Symbols Diff",
-    "Stage 2: Null Productions Diff",
-    "Stage 3: Unit Productions Diff",
-    "Stage 4: Final Useless Symbols Diff"
+    "Stage 1: Initial Useless Symbols",
+    "Stage 2: Null Productions",
+    "Stage 3: Unit Productions",
+    "Stage 4: Final Useless Symbols"
 ];
 let currentPlaybackStage = 0;
 
