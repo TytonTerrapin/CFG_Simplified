@@ -192,7 +192,6 @@ function buildHtmlLogs(logs) {
                 </div>`;
             }).join('') + `</div>`;
         } else if (log.type === "unit_replacement") {
-            const derivedAll = Array.from(new Set(Object.values(closures).flat())).filter(s => !Object.keys(closures).includes(s));
             const cLine = `<div class="concept-line" style="border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.04); color: #93c5fd;">Unit productions (A → B) introduce unnecessary indirection. We compute the full derivation closure for each variable and substitute them with direct productions.</div>`;
             details = cLine + `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
                 return `
@@ -516,7 +515,6 @@ DOM.btnAddRule.addEventListener('click', () => {
 });
 
 // Playback
-let dynamicNetwork = null;
 function updateDynamicPlayback() {
     if (!pipelineHistory.length) return;
     const cur = pipelineHistory[currentPlaybackStage], prev = currentPlaybackStage === 0 ? cur : pipelineHistory[currentPlaybackStage - 1];

@@ -71,8 +71,14 @@
                         <h3>Elimination of ε-Rules</h3>
                         <p>
                             Removes rules that derive the empty string (<span class="concept-badge">A → ε</span>).
-                            <br><br>
-                            <strong>Procedure:</strong> Find all <span class="highlight">Nullable</span> variables and generate power-set combinations for each rule.
+                        </p>
+                        <div class="formal-math" style="border-left-color: #10b981;">
+                            <span class="math-label">Nullable Set (N) & Expansion</span>
+                            <span class="math-set">N</span> = { Variables that can derive ε }<br>
+                            If <span class="math-var">A</span> → α<span class="math-var">B</span>β and <span class="math-var">B</span> is Nullable : Add <span class="math-var">A</span> → αβ
+                        </div>
+                        <p style="margin-top: 10px;">
+                            <strong>Procedure:</strong> Find all <span class="highlight">Nullable</span> variables via fixed-point iteration and generate all valid combinations for each rule.
                         </p>
                         <button class="concept-btn" onclick="populateExample('nulls')">Load ε-Example</button>
                     </div>
@@ -82,8 +88,14 @@
                         <h3>Elimination of Unit Rules</h3>
                         <p>
                             Removes "alias" transitions like <span class="concept-badge">A → B</span>.
-                            <br><br>
-                            <strong>Procedure:</strong> Compute the derivation closure for each variable and substitute rules directly.
+                        </p>
+                        <div class="formal-math" style="border-left-color: #3b82f6;">
+                            <span class="math-label">Derivation Closure</span>
+                            <span class="math-set">Closure(<span class="math-var">A</span>)</span> = { <span class="math-var">B</span> <span class="math-operator">|</span> <span class="math-var">A</span> connects to <span class="math-var">B</span> via unit rules }<br>
+                            If <span class="math-var">A</span> → <span class="math-var">B</span> and <span class="math-var">B</span> → γ : Add <span class="math-var">A</span> → γ directly.
+                        </div>
+                        <p style="margin-top: 10px;">
+                            <strong>Procedure:</strong> Compute the full closure $\mathcal{D}(A)$ for each variable and substitute dependencies directly via non-unit rules.
                         </p>
                         <button class="concept-btn" onclick="populateExample('units')">Load Unit Example</button>
                     </div>
@@ -93,8 +105,14 @@
                         <h3>Useless Symbols Pruning</h3>
                         <p>
                             Deletes symbols that never produce terminals or are unreachable from the Start symbol.
-                            <br><br>
-                            <strong>Procedure:</strong> Two-pass sweep: First <span class="highlight">Generating</span>, then <span class="highlight">Reachable</span>.
+                        </p>
+                        <div class="formal-math" style="border-left-color: #64748b;">
+                            <span class="math-label">Generating (G) & Reachable (R) Sets</span>
+                            <span class="math-set">G</span> = { Variables that eventually produce valid terminals }<br>
+                            <span class="math-set">R</span> = { Variables reachable from the Start symbol }
+                        </div>
+                        <p style="margin-top: 10px;">
+                            <strong>Procedure:</strong> Strict two-pass sweep isolating the valid mathematical subset $G \cap R$.
                         </p>
                         <button class="concept-btn" onclick="populateExample('useless')">Load Useless Example</button>
                     </div>

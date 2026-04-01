@@ -236,6 +236,30 @@ header p { color: var(--text-secondary); font-size: 1.15rem; }
     color: #ffd700; /* Gold/Yellow for badges */
 }
 
+.formal-math {
+    background: rgba(0, 0, 0, 0.4);
+    border-left: 3px solid #666;
+    padding: 10px 15px;
+    margin: 15px 0;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    border-radius: 4px;
+    line-height: 1.6;
+}
+.formal-math .math-operator { color: #34d399; font-weight: bold; }
+.formal-math .math-set { color: #facc15; }
+.formal-math .math-var { color: #60a5fa; }
+.formal-math .math-label {
+    color: #888;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+    font-family: 'Outfit', sans-serif;
+}
+
 /* Panels */
 .panel {
     display: flex;
