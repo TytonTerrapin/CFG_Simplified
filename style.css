@@ -413,6 +413,105 @@ select.builder-input { border-right: 12px solid transparent; cursor: pointer; co
 .rule-item.removal { color: var(--danger); opacity: 0.8; }
 .rule-item.kept { color: #888; }
 
+/* Enhanced Log Details */
+.log-details {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.log-details summary {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    user-select: none;
+    transition: all 0.2s;
+    list-style: none; /* Hide default arrow */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.log-details summary::before {
+    content: '→';
+    font-size: 0.9rem;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--success);
+}
+
+.log-details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.log-details summary:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.log-details summary:active {
+    transform: scale(0.98);
+}
+
+.rule-transform-container:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Graph Legend */
+.graph-legend {
+    position: absolute;
+    top: 50px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(15, 15, 15, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.75rem;
+    color: #ccc;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-line {
+    width: 14px;
+    height: 2px;
+    border-radius: 1px;
+    flex-shrink: 0;
+}
+
+.legend-dash {
+    width: 14px;
+    height: 2px;
+    border-top: 2px dashed #ef4444;
+    flex-shrink: 0;
+}
+
 /* Grammar Display Rules (Diffs) */
 .grammar-rule { display: flex; margin-bottom: 6px; padding: 6px 10px; background: #0a0a0a; border-radius: 4px; align-items: center; font-size: 1.05rem; border-left: 2px solid transparent; }
 
@@ -470,6 +569,26 @@ select.builder-input { border-right: 12px solid transparent; cursor: pointer; co
 .stage-sets-box .set-line { margin-bottom: 8px; }
 .stage-sets-box .set-line:last-child { margin-bottom: 0; }
 .set-label { color: #888; font-weight: bold; margin-right: 10px; }
+
+.concept-line {
+    font-size: 0.85rem;
+    color: var(--success);
+    background: rgba(16, 185, 129, 0.04);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid var(--success);
+    margin: 10px 0;
+    font-weight: 500;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.concept-line::before {
+    content: '💡';
+    font-size: 1rem;
+}
 
 .algo-details {
     background: #0a0a0a;

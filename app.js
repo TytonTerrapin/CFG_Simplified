@@ -165,26 +165,61 @@ function renderGrammarDiff(beforeGrammar, afterGrammar, context) {
 
 function buildHtmlLogs(logs) {
     if (!logs || logs.length === 0) return `<div class="log-entry"><p>No changes needed in this stage.</p></div>`;
+
+    const nullableSet = logs.find(l => l.type === "nullable_detection")?.nullable_symbols || [];
+    const closures = logs.find(l => l.type === "closure_calculation")?.closure || {};
+
     return logs.map(log => {
+        let conceptLine = '';
+        if (log.type === "phase1" || log.type === "phase2") {
+            conceptLine = `<div class="concept-line">Symbols not in generating/reachable sets are removed since they cannot contribute to terminal strings.</div>`;
+        }
+
         let details = '';
         if (log.type === "nullable_detection") {
             details = `<div class="rule-list"><div class="rule-item">Nullable: { ${log.nullable_symbols.join(', ')} }</div></div>`;
         } else if (log.type === "production_generation") {
-            details = `<div class="rule-list">` + log.rule_transformations.map(rt => {
-                let html = `<div class="rule-item"><strong>Rule: ${rt.original_rule}</strong></div>`;
-                rt.generated_rules.forEach(gr => {
-                    html += `<div class="rule-item ${gr.type === 'original' ? 'kept' : 'addition'}" style="margin-left: 15px;">
-                        <span>${gr.type === 'original' ? 'Kept' : 'Generated'}: ${gr.rule}</span>
-                    </div>`;
-                });
-                return html;
+            const cLine = `<div class="concept-line">Because { ${nullableSet.join(', ') || 'Ø'} } are nullable, they can be removed from productions, generating alternative rules.</div>`;
+            details = cLine + `<div class="rule-list">` + log.rule_transformations.map(rt => {
+                const generatedCount = rt.generated_rules.length - 1;
+                return `
+                <div class="rule-transform-container" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #222;">
+                    <strong>Rule: ${rt.original_rule}</strong>
+                    <div class="summary-text" style="color: var(--text-secondary); font-size: 0.85rem; margin: 4px 0 8px 0;">
+                        Generated ${generatedCount} alternative productions
+                    </div>
+                    <details class="log-details">
+                        <summary>View Details</summary>
+                        <div class="rule-list" style="border: none; background: transparent; padding: 0;">
+                            ${rt.generated_rules.map(gr => `
+                                <div class="rule-item ${gr.type === 'original' ? 'kept' : 'addition'}">
+                                    <span>${gr.type === 'original' ? 'Kept' : 'Generated'}: ${gr.rule}</span>
+                                </div>
+                            `).join("")}
+                        </div>
+                    </details>
+                </div>`;
             }).join('') + `</div>`;
         } else if (log.type === "unit_replacement") {
             details = `<div class="rule-list">` + log.rule_transformations.map(rt => {
-                let s = "";
-                rt.removed_units.forEach(ru => s += `<div class="rule-item removal">Removed unit pair: ${ru}</div>`);
-                rt.added_productions.forEach(ap => s += `<div class="rule-item addition">Generated: ${ap.rule}</div>`);
-                return s;
+                const addedCount = rt.added_productions.length;
+                const derived = (closures[rt.non_terminal] || []).filter(s => s !== rt.non_terminal);
+                const cLine = derived.length > 0 ? `<div class="concept-line">Because ${rt.non_terminal} can derive { ${derived.join(', ')} }, we replace unit chains with direct productions.</div>` : '';
+                return `
+                <div class="rule-transform-container" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #222;">
+                    <strong>Non-terminal: ${rt.non_terminal}</strong>
+                    ${cLine}
+                    <div class="summary-text" style="color: var(--text-secondary); font-size: 0.85rem; margin: 4px 0 8px 0;">
+                        Removed ${rt.removed_units.length} unit pairs, added ${addedCount} productions
+                    </div>
+                    <details class="log-details">
+                        <summary>View Details</summary>
+                        <div class="rule-list" style="border: none; background: transparent; padding: 0;">
+                            ${rt.removed_units.map(ru => `<div class="rule-item removal">Removed unit pair: ${ru}</div>`).join('')}
+                            ${rt.added_productions.map(ap => `<div class="rule-item addition">Generated: ${ap.rule}</div>`).join('')}
+                        </div>
+                    </details>
+                </div>`;
             }).join('') + `</div>`;
         } else if (log.type === "phase1" || log.type === "phase2") {
             details = `<div class="rule-list">`;
@@ -192,7 +227,7 @@ function buildHtmlLogs(logs) {
             log.removed_rules?.forEach(rr => details += `<div class="rule-item removal">Removed Rule: ${rr.original_rule}</div>`);
             details += `</div>`;
         }
-        return `<div class="log-entry"><h4>${log.title}</h4><p>${log.description}</p>${details}</div>`;
+        return `<div class="log-entry"><h4>${log.title}</h4><p>${log.description}</p>${conceptLine}${details}</div>`;
     }).join('');
 }
 
@@ -228,50 +263,134 @@ function renderSets(sets, stageIdx, containerId) {
 
 // --- Graphs ---
 
-function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container) {
+function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {}, stageIdx = 0) {
     if (!window.vis || !container) return;
     container.innerHTML = '';
-    const getDep = (grammar) => {
-        let nodes = new Set(), edges = new Set(), isTerm = new Set();
-        for (let lhs in grammar) {
+    
+    const isVar = (s) => s && s.length === 1 && s >= 'A' && s <= 'Z';
+
+    const getAnalysis = (g) => {
+        const nodes = new Set();
+        const prods = [];
+        for (let lhs in g) {
             nodes.add(lhs);
-            for (let rhs of grammar[lhs]) {
-                if (rhs === '') { nodes.add('?'); isTerm.add('?'); edges.add(`${lhs}->?`); continue; }
+            for (let rhs of g[lhs]) {
+                if (rhs === '') { nodes.add('?'); }
+                const isUnit = rhs.length === 1 && isVar(rhs);
+                prods.push({lhs, rhs, isUnit});
                 for (let i = 0; i < rhs.length; i++) {
-                    let char = rhs[i];
+                    const char = rhs[i];
                     if (char !== ' ' && char !== '|') {
-                        nodes.add(char); edges.add(`${lhs}->${char}`);
-                        if (!(char >= 'A' && char <= 'Z')) isTerm.add(char);
+                        nodes.add(char);
+                        if (!isVar(char)) { /* terminal node */ }
                     }
                 }
             }
         }
-        return { nodes, edges, isTerm };
+        return {nodes, prods};
     };
-    const bD = getDep(beforeGrammar), aD = getDep(afterGrammar);
-    const visNodes = new vis.DataSet(), visEdges = new vis.DataSet();
-    const allNodes = new Set([...bD.nodes, ...aD.nodes]);
-    allNodes.forEach(n => {
-        let status = !bD.nodes.has(n) ? 'added' : (!aD.nodes.has(n) ? 'removed' : 'kept');
-        let color = '#4a5568', border = '#111', dashes = false;
-        if (status === 'added') { color = 'rgba(16, 185, 129, 0.4)'; border = '#10b981'; }
-        if (status === 'removed') { color = 'rgba(239, 68, 68, 0.4)'; border = '#ef4444'; dashes = true; }
-        if (n === 'S') color = '#2b6cb0';
-        visNodes.add({ id: n, label: n, color: { background: color, border: border }, shape: (bD.isTerm.has(n) || aD.isTerm.has(n)) ? 'box' : 'circle', shapeProperties: { borderDashes: dashes }, font: { color: 'white' } });
+
+    const bA = getAnalysis(beforeGrammar);
+    const aA = getAnalysis(afterGrammar);
+    const visNodes = new vis.DataSet();
+    const visEdges = new vis.DataSet();
+    const allNodeIds = new Set([...bA.nodes, ...aA.nodes]);
+
+    allNodeIds.forEach(id => {
+        const status = !bA.nodes.has(id) ? 'added' : (!aA.nodes.has(id) ? 'removed' : 'kept');
+        const isTerm = !isVar(id) && id !== '?';
+        
+        let color = '#4a5568', borderColor = '#111', opacity = 1;
+        
+        // Node role highlighting
+        if ((stageIdx === 1 || stageIdx === 4) && sets.generating) {
+            if (sets.generating.includes(id)) { color = '#34d399'; borderColor = '#059669'; } // Generating
+            else if (!isTerm) { color = '#f87171'; borderColor = '#ef4444'; } // Non-generating
+        }
+        if ((stageIdx === 1 || stageIdx === 4) && sets.reachable && !sets.reachable.includes(id)) {
+            color = '#94a3b8'; borderColor = '#475569'; // Unreachable
+        }
+        if (stageIdx === 2 && sets.nullable?.includes(id)) { color = '#fbbf24'; borderColor = '#f59e0b'; } // Nullable
+
+        if (id === 'S') color = '#3b82f6';
+        if (id === '?') color = '#6b7280';
+
+        if (status === 'added') { color = 'rgba(16,185,129, 0.4)'; borderColor = '#34d399'; opacity = 0.9; }
+        if (status === 'removed') { color = 'rgba(239, 68, 68, 0.2)'; borderColor = '#ef4444'; opacity = 0.3; }
+
+        visNodes.add({
+            id, label: id,
+            color: { background: color, border: borderColor, highlight: { background: color, border: '#fff' } },
+            shape: isTerm ? 'box' : 'circle',
+            opacity: opacity,
+            font: { color: '#fff', size: 14, strokeWidth: 1, strokeColor: '#000' }
+        });
     });
-    new Set([...bD.edges, ...aD.edges]).forEach(e => {
-        let [from, to] = e.split('->'), status = !bD.edges.has(e) ? 'added' : (!aD.edges.has(e) ? 'removed' : 'kept');
-        let color = status === 'added' ? '#10b981' : (status === 'removed' ? '#ef4444' : '#555');
-        visEdges.add({ from, to, arrows: 'to', color: { color }, dashes: status === 'removed', width: status === 'kept' ? 1 : 2.5 });
+
+    const edgeMap = new Map();
+    const processEdges = (analysis, status) => {
+        analysis.prods.forEach(p => {
+            const rhs = p.rhs === '' ? '?' : p.rhs;
+            for (let i = 0; i < rhs.length; i++) {
+                const char = rhs[i];
+                if (char === ' ' || char === '|') continue;
+                const edgeKey = `${p.lhs}->${char}`;
+                const existing = edgeMap.get(edgeKey);
+                if (!existing) {
+                    edgeMap.set(edgeKey, { from: p.lhs, to: char, isUnit: p.isUnit, status });
+                } else if (status === 'added' && existing.status === 'removed') {
+                    existing.status = 'kept';
+                }
+            }
+        });
+    };
+
+    processEdges(bA, 'removed');
+    processEdges(aA, 'added');
+
+    edgeMap.forEach((e, key) => {
+        let edgeColor = '#666', width = 1.5, dashes = false;
+        if (e.status === 'added') { edgeColor = '#34d399'; width = 2.5; }
+        if (e.status === 'removed') { edgeColor = '#ef4444'; width = 1.5; dashes = true; }
+        if (e.isUnit && e.status !== 'removed') { edgeColor = '#3b82f6'; width = 2.5; } // Blue unit edges
+
+        visEdges.add({
+            id: key, from: e.from, to: e.to, arrows: 'to',
+            color: { color: edgeColor, highlight: '#fff' },
+            width: width,
+            dashes: dashes,
+            label: e.isUnit && e.status === 'kept' ? 'unit' : '',
+            font: { color: '#3b82f6', size: 10, strokeWidth: 2, strokeColor: '#000' }
+        });
     });
-    networkInstances[container.id] = new vis.Network(container, { nodes: visNodes, edges: visEdges }, { 
-        physics: { stabilization: true }, 
-        interaction: { 
-            zoomView: true, 
-            dragView: true,
-            hover: true
-        } 
+
+    const network = new vis.Network(container, { nodes: visNodes, edges: visEdges }, {
+        physics: { stabilization: true },
+        interaction: { hover: true, tooltipDelay: 200 }
     });
+
+    if (stageIdx === 3 && sets.closures) {
+        network.on("hoverNode", (params) => {
+            const node = params.node;
+            const reachable = sets.closures[node] || [];
+            const edgeUpdates = [];
+            visEdges.forEach(edge => {
+                if (reachable.includes(edge.from) && reachable.includes(edge.to) && edge.font) {
+                    edgeUpdates.push({ id: edge.id, width: 5, color: '#3b82f6' });
+                }
+            });
+            visEdges.update(edgeUpdates);
+        });
+        network.on("blurNode", () => {
+            const edgeResets = [];
+            visEdges.forEach(edge => {
+                if (edge.font) edgeResets.push({ id: edge.id, width: 2.5, color: '#3b82f6' });
+            });
+            visEdges.update(edgeResets);
+        });
+    }
+
+    networkInstances[container.id] = network;
 }
 
 // --- Pipeline Control ---
@@ -307,7 +426,10 @@ function processAllStepsAndRender() {
     renderStats(pipelineHistory[0].metrics, pipelineHistory[4].metrics, 'final-stats');
 
     setTimeout(() => {
-        for (let i = 1; i <= 4; i++) renderGrammarDiffGraph(pipelineHistory[i - 1].grammar, pipelineHistory[i].grammar, DOM.stages[i - 1].network);
+        for (let i = 1; i <= 4; i++) {
+            const stage = pipelineHistory[i], prev = pipelineHistory[i - 1];
+            renderGrammarDiffGraph(prev.grammar, stage.grammar, DOM.stages[i - 1].network, stage.stage_sets || stage.sets, i);
+        }
         currentPlaybackStage = 0;
         updateDynamicPlayback();
     }, 200);
@@ -363,7 +485,8 @@ function updateDynamicPlayback() {
     if (!pipelineHistory.length) return;
     const cur = pipelineHistory[currentPlaybackStage], prev = currentPlaybackStage === 0 ? cur : pipelineHistory[currentPlaybackStage - 1];
     DOM.graphStageLabel.innerText = STAGE_LABELS[currentPlaybackStage];
-    renderGrammarDiffGraph(prev.grammar, cur.grammar, DOM.dynamicNetwork);
+    const sets = cur.stage_sets || cur.sets || {};
+    renderGrammarDiffGraph(prev.grammar, cur.grammar, DOM.dynamicNetwork, sets, currentPlaybackStage);
     DOM.btnPrevGraph.disabled = currentPlaybackStage === 0;
     DOM.btnNextGraph.disabled = currentPlaybackStage === STAGE_LABELS.length - 1;
 }
