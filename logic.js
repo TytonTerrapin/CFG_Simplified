@@ -365,8 +365,15 @@ function _phase1_remove_nonproductive(grammar) {
         for (const nt of new_productive) productive.add(nt);
     }
     
-    const all_nts = Object.keys(grammar);
-    const non_productive = new Set(all_nts.filter(x => !productive.has(x)));
+    const all_nts = new Set(Object.keys(grammar));
+    for (const nt in grammar) {
+        for (const prod of grammar[nt]) {
+            for (const sym of prod) {
+                if (isUpper(sym)) all_nts.add(sym);
+            }
+        }
+    }
+    const non_productive = new Set(Array.from(all_nts).filter(x => !productive.has(x)));
     
     const filteredGrammar = {};
     for (const non_terminal in grammar) {
@@ -419,6 +426,13 @@ function _phase1_remove_nonproductive(grammar) {
                     });
                 }
             }
+        } else if (!rule_removals.some(r => r.removed_symbols && r.removed_symbols.includes(sym))) {
+            rule_removals.push({
+                original_rule: `(Undefined) ${sym}`,
+                reason: `Symbol '${sym}' is undefined (has no rules) and thus never produces terminals.`,
+                removed_symbols: [sym],
+                type: "non_productive"
+            });
         }
     }
     

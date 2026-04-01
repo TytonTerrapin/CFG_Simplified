@@ -71,10 +71,10 @@ const DOM = {
 
 const STAGE_LABELS = [
     "Original Grammar",
-    "Stage 1: Useless Symbols",
-    "Stage 2: Null Productions",
-    "Stage 3: Unit Productions",
-    "Stage 4: Final Cleanup"
+    "Stage 1: Null Productions",
+    "Stage 2: Unit Productions",
+    "Stage 3: Useless Symbols",
+    "Stage 4: Validation & Summary"
 ];
 
 const EXAMPLES = {
@@ -632,10 +632,10 @@ async function generateProjectPDF() {
 
         const descriptions = [
             "",
-            "Phase 1 & 2: Eliminating non-productive symbols and those unreachable from 'S'.",
-            "Handling nullable symbols (X ->* ε) by creating non-null production variants.",
-            "Eliminating unit transitions (A -> B) via derivation closure substitution.",
-            "Final Sweep: Pruning any byproduct symbols that became redundant."
+            "Elimination of ε-productions (A → ε) preserving derivation equivalence.",
+            "Calculation of derivation closure to collapse redundant unit indirection (A → B).",
+            "Pruning of symbols unresolvable to terminal strings or dynamically unreachable from S.",
+            "Execution of convergence check confirming mathematical stability."
         ];
 
         const splitDesc = doc.splitTextToSize(descriptions[i], 170);
@@ -646,6 +646,8 @@ async function generateProjectPDF() {
         const logData = [];
         const logs = stage.step_logs || stage.logs || [];
         logs.forEach(log => {
+            if (log.type === "summary-clear") logData.push(['Validation', '✓ PASSED: Grammar is stable']);
+            if (log.type === "summary-warning") logData.push(['Validation', '⚠ WARNING: Grammar unstable']);
             if (log.removed_symbols?.length > 0) logData.push(['Pruning', `Removed symbols: { ${log.removed_symbols.join(', ')} }`]);
             if (log.removed_rules?.length > 0) log.removed_rules.forEach(r => logData.push(['Pruning', r.original_rule.replace('→', '->')]));
             if (log.rule_transformations) {
