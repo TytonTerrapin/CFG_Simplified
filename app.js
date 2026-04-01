@@ -3,17 +3,17 @@ import { remove_null_productions, remove_unit_productions, remove_useless_symbol
 const DOM = {
     cfgInput: document.getElementById('cfg-input'),
     btnStart: document.getElementById('btn-start'),
-    
+
     btnLoadExample: document.getElementById('btn-load-example'),
     btnClear: document.getElementById('btn-clear'),
     exampleSelect: document.getElementById('example-select'),
-    
+
     btnAddRule: document.getElementById('btn-add-rule'),
     builderLhs: document.getElementById('builder-lhs'),
     builderRhs: document.getElementById('builder-rhs'),
-    
+
     pipelineResults: document.getElementById('pipeline-results'),
-    
+
     // Stage-specific containers
     stages: [
         {
@@ -56,18 +56,18 @@ const DOM = {
 
     finalOrig: document.getElementById('final-original'),
     finalSimp: document.getElementById('final-simplified'),
-    
+
     // Dynamic Replay
     btnPrevGraph: document.getElementById('btn-prev-graph'),
     btnNextGraph: document.getElementById('btn-next-graph'),
     graphStageLabel: document.getElementById('graph-stage-label'),
     dynamicNetwork: document.getElementById('dynamic-network'),
-    
+
     // Navigator & Progress
     navigator: document.getElementById('stage-navigator'),
     navItems: document.querySelectorAll('.nav-item'),
     progressBar: document.getElementById('scroll-progress'),
-    
+
     btnExportReport: document.getElementById('btn-export-report'),
 };
 
@@ -88,7 +88,7 @@ const EXAMPLES = {
     complex2: "S -> XYZ | UVW\nX -> Y | a\nY -> Z | b\nZ -> X | c | ?"
 };
 
-let pipelineHistory = []; 
+let pipelineHistory = [];
 let networkInstances = {};
 let currentPlaybackStage = 0;
 
@@ -237,7 +237,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container) {
             nodes.add(lhs);
             for (let rhs of grammar[lhs]) {
                 if (rhs === '') { nodes.add('?'); isTerm.add('?'); edges.add(`${lhs}->?`); continue; }
-                for (let i=0; i<rhs.length; i++) {
+                for (let i = 0; i < rhs.length; i++) {
                     let char = rhs[i];
                     if (char !== ' ' && char !== '|') {
                         nodes.add(char); edges.add(`${lhs}->${char}`);
@@ -264,7 +264,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container) {
         let color = status === 'added' ? '#10b981' : (status === 'removed' ? '#ef4444' : '#555');
         visEdges.add({ from, to, arrows: 'to', color: { color }, dashes: status === 'removed', width: status === 'kept' ? 1 : 2.5 });
     });
-    networkInstances[container.id] = new vis.Network(container, {nodes: visNodes, edges: visEdges}, { physics: { stabilization: true }, interaction: { zoomView: false } });
+    networkInstances[container.id] = new vis.Network(container, { nodes: visNodes, edges: visEdges }, { physics: { stabilization: true }, interaction: { zoomView: false } });
 }
 
 // --- Pipeline Control ---
@@ -288,7 +288,7 @@ function processAllStepsAndRender() {
     DOM.btnExportReport.style.display = 'inline-block';
 
     for (let i = 1; i <= 4; i++) {
-        const stage = pipelineHistory[i], prev = pipelineHistory[i-1], dm = DOM.stages[i-1];
+        const stage = pipelineHistory[i], prev = pipelineHistory[i - 1], dm = DOM.stages[i - 1];
         dm.logs.innerHTML = buildHtmlLogs(stage.step_logs || stage.logs);
         dm.before.innerHTML = renderGrammarDiff(prev.grammar, stage.grammar, 'before');
         dm.after.innerHTML = renderGrammarDiff(prev.grammar, stage.grammar, 'after');
@@ -300,7 +300,7 @@ function processAllStepsAndRender() {
     renderStats(pipelineHistory[0].metrics, pipelineHistory[4].metrics, 'final-stats');
 
     setTimeout(() => {
-        for (let i = 1; i <= 4; i++) renderGrammarDiffGraph(pipelineHistory[i-1].grammar, pipelineHistory[i].grammar, DOM.stages[i-1].network);
+        for (let i = 1; i <= 4; i++) renderGrammarDiffGraph(pipelineHistory[i - 1].grammar, pipelineHistory[i].grammar, DOM.stages[i - 1].network);
         currentPlaybackStage = 0;
         updateDynamicPlayback();
     }, 200);
@@ -313,7 +313,6 @@ const observerOptions = { threshold: 0.3 };
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
             const targetId = entry.target.id;
             DOM.navItems.forEach(item => {
                 item.classList.toggle('active', item.dataset.target === targetId);
@@ -355,7 +354,7 @@ DOM.btnAddRule.addEventListener('click', () => {
 let dynamicNetwork = null;
 function updateDynamicPlayback() {
     if (!pipelineHistory.length) return;
-    const cur = pipelineHistory[currentPlaybackStage], prev = currentPlaybackStage === 0 ? cur : pipelineHistory[currentPlaybackStage-1];
+    const cur = pipelineHistory[currentPlaybackStage], prev = currentPlaybackStage === 0 ? cur : pipelineHistory[currentPlaybackStage - 1];
     DOM.graphStageLabel.innerText = STAGE_LABELS[currentPlaybackStage];
     renderGrammarDiffGraph(prev.grammar, cur.grammar, DOM.dynamicNetwork);
     DOM.btnPrevGraph.disabled = currentPlaybackStage === 0;
@@ -378,7 +377,7 @@ async function generateProjectPDF() {
     const primaryColor = [16, 185, 129];
     const textColor = [20, 20, 20];
     const secondaryTextColor = [100, 100, 100];
-    
+
     let currentY = 20;
     const margin = 20;
     const pageHeight = 297;
@@ -412,7 +411,7 @@ async function generateProjectPDF() {
     doc.setTextColor(...textColor);
     doc.text("CFG Simplification Report", margin, currentY + 15);
     currentY += 25;
-    
+
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryTextColor);
@@ -420,7 +419,7 @@ async function generateProjectPDF() {
     currentY += 12;
 
     addSectionHeader("Initial Grammar State");
-    
+
     const initMetrics = pipelineHistory[0].metrics;
     doc.autoTable({
         startY: currentY,
@@ -443,7 +442,7 @@ async function generateProjectPDF() {
     doc.setTextColor(...textColor);
     doc.text("Input Grammar Rules:", margin, currentY);
     currentY += 6;
-    
+
     const sourceGrammarLines = [];
     for (let k in pipelineHistory[0].grammar) {
         sourceGrammarLines.push(`${k} -> ${pipelineHistory[0].grammar[k].map(x => x || 'ε').join(' | ')}`);
@@ -458,13 +457,13 @@ async function generateProjectPDF() {
     // --- Stages 1-4 Analysis ---
     for (let i = 1; i <= 4; i++) {
         const stage = pipelineHistory[i];
-        
+
         addSectionHeader(STAGE_LABELS[i]);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
         doc.setTextColor(...secondaryTextColor);
-        
+
         const descriptions = [
             "",
             "Phase 1 & 2: Eliminating non-productive symbols and those unreachable from 'S'.",
@@ -472,7 +471,7 @@ async function generateProjectPDF() {
             "Eliminating unit transitions (A -> B) via derivation closure substitution.",
             "Final Sweep: Pruning any byproduct symbols that became redundant."
         ];
-        
+
         const splitDesc = doc.splitTextToSize(descriptions[i], 170);
         doc.text(splitDesc, margin, currentY);
         currentY += (splitDesc.length * 5) + 5;
@@ -522,11 +521,11 @@ async function generateProjectPDF() {
                     tCtx.fillStyle = '#FFFFFF';
                     tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
                     tCtx.drawImage(canvas, 0, 0);
-                    
+
                     const imgData = tempCanvas.toDataURL('image/png', 0.8);
                     const imgH = 50; // Optimized height
                     ensureSpace(imgH + 10);
-                    
+
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(10);
                     doc.setTextColor(...textColor);
@@ -545,7 +544,7 @@ async function generateProjectPDF() {
     for (let k in pipelineHistory[4].grammar) {
         finalSimpLines.push(`${k} -> ${pipelineHistory[4].grammar[k].map(x => x || 'ε').join(' | ')}`);
     }
-    
+
     ensureSpace((finalSimpLines.length * 5) + 30);
     doc.setFont("courier", "normal");
     doc.setFontSize(10);
@@ -555,8 +554,8 @@ async function generateProjectPDF() {
 
     const finalMetrics = pipelineHistory[4].metrics;
     const startMetrics = pipelineHistory[0].metrics;
-    const calcRed = (s, f) => s === 0 ? '0%' : `${Math.round((1 - f/s)*100)}%`;
-    
+    const calcRed = (s, f) => s === 0 ? '0%' : `${Math.round((1 - f / s) * 100)}%`;
+
     doc.autoTable({
         startY: currentY,
         head: [['Metric', 'Initial', 'Final', 'Reduction']],

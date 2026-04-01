@@ -449,15 +449,8 @@ select.builder-input { border-right: 12px solid transparent; cursor: pointer; co
 }
 
 .animate-panel {
-    opacity: 0;
-    animation: slideUpFade 0.7s ease-out forwards;
+    opacity: 1;
 }
-
-#step-1.animate-panel { animation-delay: 0.1s; }
-#step-2.animate-panel { animation-delay: 0.3s; }
-#step-3.animate-panel { animation-delay: 0.5s; }
-#step-4.animate-panel { animation-delay: 0.7s; }
-#step-5.animate-panel { animation-delay: 0.9s; }
 
 
 .stage-sets-box {
@@ -627,14 +620,9 @@ select.builder-input { border-right: 12px solid transparent; cursor: pointer; co
 
 /* Animation on Scroll */
 .animate-on-scroll {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.animate-on-scroll.revealed {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
+    transition: none;
 }
 
 /* Typography & Neon */
