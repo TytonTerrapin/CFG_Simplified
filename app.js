@@ -147,21 +147,27 @@ function renderGrammarDiff(beforeGrammar, afterGrammar, context) {
             const unionRhs = [...new Set([...beforeRhs, ...afterRhs])];
             if (unionRhs.length === 0) continue;
             
-            let tokens = [];
-            unionRhs.forEach(r => {
-                if (beforeRhs.has(r) && !afterRhs.has(r)) {
-                    tokens.push(`<span class="token-anim-removed">${r}</span>`);
-                } else if (!beforeRhs.has(r) && afterRhs.has(r)) {
-                    tokens.push(`<span class="token-anim-added">+ ${r}</span>`);
+            let tokensHtml = '';
+            unionRhs.forEach((r, idx) => {
+                const isRemoved = beforeRhs.has(r) && !afterRhs.has(r);
+                const isAdded = !beforeRhs.has(r) && afterRhs.has(r);
+                const isLast = idx === unionRhs.length - 1;
+                
+                const pipeHtml = isLast ? '' : `<span class="pipe">|</span>`;
+                
+                if (isRemoved) {
+                    tokensHtml += `<span class="token-anim-removed-container"><span class="token-anim-removed">${r}</span>${pipeHtml}</span>`;
+                } else if (isAdded) {
+                    tokensHtml += `<span class="token-anim-added-container"><span class="token-anim-added">+ ${r}</span>${pipeHtml}</span>`;
                 } else {
-                    tokens.push(`<span class="token-kept">${r}</span>`);
+                    tokensHtml += `<span class="token-kept-container"><span class="token-kept">${r}</span>${pipeHtml}</span>`;
                 }
             });
             
             ht += `<div class="grammar-rule">
                 <span class="rule-lhs">${lhs}</span>
                 <span class="rule-arrow">→</span>
-                <span class="rule-rhs">${tokens.join(' <span class="pipe">|</span> ')}</span>
+                <span class="rule-rhs" style="display: flex; flex-wrap: wrap; align-items: center;">${tokensHtml}</span>
             </div>`;
         }
         return ht;
