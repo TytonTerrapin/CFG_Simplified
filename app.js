@@ -180,45 +180,31 @@ function buildHtmlLogs(logs) {
             details = `<div class="rule-list"><div class="rule-item">Nullable: { ${log.nullable_symbols.join(', ')} }</div></div>`;
         } else if (log.type === "production_generation") {
             const cLine = `<div class="concept-line">Because { ${nullableSet.join(', ') || 'Ø'} } are nullable, they can be removed from productions, generating alternative rules.</div>`;
-            details = cLine + `<div class="rule-list">` + log.rule_transformations.map(rt => {
-                const generatedCount = rt.generated_rules.length - 1;
+            details = cLine + `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
                 return `
-                <div class="rule-transform-container" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #222;">
-                    <strong>Rule: ${rt.original_rule}</strong>
-                    <div class="summary-text" style="color: var(--text-secondary); font-size: 0.85rem; margin: 4px 0 8px 0;">
-                        Generated ${generatedCount} alternative productions
+                <div class="rule-transform-container" style="margin-bottom: 15px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #666;">
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 8px;">Rule: ${rt.original_rule}</div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        ${rt.generated_rules.map(gr => `
+                            <div class="rule-item ${gr.type === 'original' ? 'kept' : 'addition'}" style="padding-left: 10px; border-left: 1px solid #333; font-size: 0.85rem;">
+                                <span>${gr.type === 'original' ? 'Kept' : 'Generated'}: ${gr.rule}</span>
+                            </div>
+                        `).join("")}
                     </div>
-                    <details class="log-details">
-                        <summary>View Details</summary>
-                        <div class="rule-list" style="border: none; background: transparent; padding: 0;">
-                            ${rt.generated_rules.map(gr => `
-                                <div class="rule-item ${gr.type === 'original' ? 'kept' : 'addition'}">
-                                    <span>${gr.type === 'original' ? 'Kept' : 'Generated'}: ${gr.rule}</span>
-                                </div>
-                            `).join("")}
-                        </div>
-                    </details>
                 </div>`;
             }).join('') + `</div>`;
         } else if (log.type === "unit_replacement") {
-            details = `<div class="rule-list">` + log.rule_transformations.map(rt => {
-                const addedCount = rt.added_productions.length;
+            details = `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
                 const derived = (closures[rt.non_terminal] || []).filter(s => s !== rt.non_terminal);
-                const cLine = derived.length > 0 ? `<div class="concept-line">Because ${rt.non_terminal} can derive { ${derived.join(', ')} }, we replace unit chains with direct productions.</div>` : '';
+                const cLine = derived.length > 0 ? `<div class="concept-line" style="margin-bottom: 12px;">Because ${rt.non_terminal} can derive { ${derived.join(', ')} }, we replace unit chains with direct productions.</div>` : '';
                 return `
-                <div class="rule-transform-container" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #222;">
-                    <strong>Non-terminal: ${rt.non_terminal}</strong>
+                <div class="rule-transform-container" style="margin-bottom: 15px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 8px;">Non-terminal: ${rt.non_terminal}</div>
                     ${cLine}
-                    <div class="summary-text" style="color: var(--text-secondary); font-size: 0.85rem; margin: 4px 0 8px 0;">
-                        Removed ${rt.removed_units.length} unit pairs, added ${addedCount} productions
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        ${rt.removed_units.map(ru => `<div class="rule-item removal" style="padding-left: 10px; border-left: 1px solid #444; font-size: 0.85rem;">Removed unit pair: ${ru}</div>`).join('')}
+                        ${rt.added_productions.map(ap => `<div class="rule-item addition" style="padding-left: 10px; border-left: 1px solid #444; font-size: 0.85rem;">Generated: ${ap.rule}</div>`).join('')}
                     </div>
-                    <details class="log-details">
-                        <summary>View Details</summary>
-                        <div class="rule-list" style="border: none; background: transparent; padding: 0;">
-                            ${rt.removed_units.map(ru => `<div class="rule-item removal">Removed unit pair: ${ru}</div>`).join('')}
-                            ${rt.added_productions.map(ap => `<div class="rule-item addition">Generated: ${ap.rule}</div>`).join('')}
-                        </div>
-                    </details>
                 </div>`;
             }).join('') + `</div>`;
         } else if (log.type === "phase1" || log.type === "phase2") {
