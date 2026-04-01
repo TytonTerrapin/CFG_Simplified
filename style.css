@@ -413,49 +413,7 @@ select.builder-input { border-right: 12px solid transparent; cursor: pointer; co
 .rule-item.removal { color: var(--danger); opacity: 0.8; }
 .rule-item.kept { color: #888; }
 
-/* Enhanced Log Details */
-.log-details {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    margin-top: 8px;
-}
-
-.log-details summary {
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    color: #888;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    user-select: none;
-    transition: all 0.2s;
-    list-style: none; /* Hide default arrow */
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.log-details summary::before {
-    content: '→';
-    font-size: 0.9rem;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--success);
-}
-
-.log-details[open] summary::before {
-    transform: rotate(90deg);
-}
-
-.log-details summary:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.log-details summary:active {
-    transform: scale(0.98);
-}
+/* Obsolete log details styles removed as logs are now displayed flat. */
 
 .rule-transform-container:last-child {
     border-bottom: none !important;

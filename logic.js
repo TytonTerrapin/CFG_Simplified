@@ -47,11 +47,10 @@ function remove_null_productions(grammar) {
         };
     }
 
-    const original_grammar = JSON.parse(JSON.stringify(grammar));
     const new_productions = {};
     const rule_transformations = [];
 
-    for (const [non_terminal, productions] of Object.entries(original_grammar)) {
+    for (const [non_terminal, productions] of Object.entries(grammar)) {
         new_productions[non_terminal] = new Set();
         
         for (const production of productions) {
@@ -361,10 +360,7 @@ function remove_useless_symbols(grammar, stageTitle = "Useless Symbols Removal")
 function _phase1_remove_nonproductive(grammar) {
     const productive = new Set();
     let changed = true;
-    const iterations = [];
     const rule_removals = [];
-    
-    const original_grammar = JSON.parse(JSON.stringify(grammar));
     
     while (changed) {
         changed = false;
@@ -382,7 +378,6 @@ function _phase1_remove_nonproductive(grammar) {
             }
         }
         for (const nt of new_productive) productive.add(nt);
-        iterations.push(Array.from(productive));
     }
     
     const all_nts = Object.keys(grammar);
@@ -429,7 +424,6 @@ function _phase1_remove_nonproductive(grammar) {
         productive_symbols: Array.from(productive),
         removed_symbols: Array.from(non_productive),
         removed_rules: rule_removals,
-        iterations: iterations,
         type: "phase1"
     };
 }
@@ -448,7 +442,6 @@ function _phase2_remove_unreachable(grammar) {
     
     const reachable = new Set(['S']);
     const queue = ['S'];
-    const iterations = [Array.from(reachable)];
     const rule_removals = [];
     
     while (queue.length > 0) {
@@ -461,7 +454,6 @@ function _phase2_remove_unreachable(grammar) {
                 if (isUpper(symbol) && !reachable.has(symbol)) {
                     reachable.add(symbol);
                     queue.push(symbol);
-                    iterations.push(Array.from(reachable));
                 }
             }
         }
@@ -489,7 +481,6 @@ function _phase2_remove_unreachable(grammar) {
         reachable_symbols: Array.from(reachable),
         removed_symbols: Array.from(non_reachable),
         removed_rules: rule_removals,
-        iterations: iterations,
         type: "phase2"
     };
 }

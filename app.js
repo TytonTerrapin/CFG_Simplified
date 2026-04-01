@@ -3,8 +3,6 @@ import { remove_null_productions, remove_unit_productions, remove_useless_symbol
 const DOM = {
     cfgInput: document.getElementById('cfg-input'),
     btnStart: document.getElementById('btn-start'),
-
-    btnLoadExample: document.getElementById('btn-load-example'),
     btnClear: document.getElementById('btn-clear'),
     exampleSelect: document.getElementById('example-select'),
 
