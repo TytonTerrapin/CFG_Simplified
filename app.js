@@ -455,8 +455,17 @@ DOM.navItems.forEach(item => {
 // --- UI Listeners ---
 
 DOM.btnStart.addEventListener('click', processAllStepsAndRender);
-DOM.btnLoadExample.addEventListener('click', () => { DOM.cfgInput.value = EXAMPLES[DOM.exampleSelect.value] || EXAMPLES.general; });
-DOM.btnClear.addEventListener('click', () => { DOM.cfgInput.value = ''; DOM.pipelineResults.classList.add('hidden'); DOM.navigator.classList.remove('visible'); });
+DOM.exampleSelect.addEventListener('change', () => { 
+    if (DOM.exampleSelect.value) {
+        DOM.cfgInput.value = EXAMPLES[DOM.exampleSelect.value] || EXAMPLES.general; 
+    }
+});
+DOM.btnClear.addEventListener('click', () => { 
+    DOM.cfgInput.value = ''; 
+    DOM.exampleSelect.value = '';
+    DOM.pipelineResults.classList.add('hidden'); 
+    DOM.navigator.classList.remove('visible'); 
+});
 
 DOM.btnAddRule.addEventListener('click', () => {
     const lhs = DOM.builderLhs.value.trim().toUpperCase(), rhs = DOM.builderRhs.value.trim();
