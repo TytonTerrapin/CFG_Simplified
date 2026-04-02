@@ -2,6 +2,13 @@
 
 **CFG Simplified** is a high-fidelity, interactive platform for the formal simplification of **Context-Free Grammars (CFGs)**. It bridges the gap between theoretical computer science and practical tooling by providing a real-time, state-first execution trace of the transformation pipeline.
 
+### 🔗 Live Demo
+
+| Platform | Link |
+|----------|------|
+| **GitHub Pages** | [https://tytonterrapin.github.io/CFG_Simplified/](https://tytonterrapin.github.io/CFG_Simplified/) |
+| **Vercel** | [https://cfg-simplified.vercel.app/](https://cfg-simplified.vercel.app/) |
+
 ## Key Capabilities
 
 - **Immutable Transformation Pipeline**: Decouples algorithmic logic from rendering by capturing independent grammar states at every stage, ensuring a reliable and traceable evolution.
