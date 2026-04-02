@@ -129,7 +129,7 @@ function extractLogRows(stage) {
                 rt.removed_units?.forEach(ru => {
                     rows.push([
                         { text: 'Removed Unit', bold: true, color: C.red },
-                        { text: sanitize(ru), color: C.darkText }
+                        { text: sanitize(typeof ru === 'string' ? ru : ru.rule), color: C.darkText }
                     ]);
                 });
                 rt.added_productions?.forEach(ap => {
