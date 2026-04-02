@@ -211,23 +211,135 @@ function buildHtmlLogs(logs) {
         }
 
         let details = '';
+
+        // ============ NULLABLE DETECTION ============
         if (log.type === "nullable_detection") {
-            details = `<div class="rule-list"><div class="rule-item">Nullable: { ${log.nullable_symbols.join(', ')} }</div></div>`;
+            details = `<div class="rule-list"><div class="rule-item" style="font-weight:600;">Nullable Set: { ${log.nullable_symbols.join(', ') || 'Ø'} }</div></div>`;
+            // Iteration trace
+            if (log.iterations && log.iterations.length > 0) {
+                details += `<div class="reasoning-trace">`;
+                details += `<div class="reasoning-trace-title">Fixed-Point Iteration Trace</div>`;
+                for (const iter of log.iterations) {
+                    details += `<div class="iteration-block">`;
+                    details += `<div class="iteration-header">Iteration ${iter.iteration} — Found: { ${iter.found.join(', ')} }</div>`;
+                    for (const step of iter.reasoning_steps) {
+                        const methodIcon = step.method === 'direct' ? '⚡' : '🔗';
+                        const methodClass = step.method === 'direct' ? 'method-direct' : 'method-transitive';
+                        details += `<div class="reasoning-step ${methodClass}">
+                            <span class="reasoning-icon">${methodIcon}</span>
+                            <div class="reasoning-body">
+                                <div class="reasoning-rule">${step.rule_used}</div>
+                                <div class="reasoning-text">${step.reason}</div>
+                            </div>
+                        </div>`;
+                    }
+                    details += `<div class="iteration-result">Nullable so far: { ${iter.nullable_so_far.join(', ')} }</div>`;
+                    details += `</div>`;
+                }
+                details += `</div>`;
+            }
+
+        // ============ PRODUCTION GENERATION ============
         } else if (log.type === "production_generation") {
-            const cLine = `<div class="concept-line">Because { ${nullableSet.join(', ') || 'Ø'} } are nullable, they can be removed from productions, generating alternative rules.</div>`;
+            const cLine = `<div class="concept-line">Because { ${nullableSet.join(', ') || 'Ø'} } are nullable, for each production with k nullable positions we generate 2<sup>k</sup> − 1 new alternatives.</div>`;
             details = cLine + `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
+                const nullableInfo = rt.nullable_in_production && rt.nullable_in_production.length > 0
+                    ? `<div class="nullable-positions">Nullable positions: ${rt.nullable_in_production.map(n => `<span class="pos-badge">${n.symbol}<sub>${n.position}</sub></span>`).join(' ')} → ${rt.total_combinations} combination(s)</div>`
+                    : `<div class="nullable-positions" style="color:#666;">No nullable symbols in this production.</div>`;
                 return `
                 <div class="rule-transform-container" style="margin-bottom: 15px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #666;">
-                    <div style="font-weight: 600; color: #fff; margin-bottom: 8px;">Rule: ${rt.original_rule}</div>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 4px;">Rule: ${rt.original_rule}</div>
+                    ${nullableInfo}
+                    <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
                         ${rt.generated_rules.map(gr => `
-                            <div class="rule-item ${gr.type === 'original' ? 'kept' : 'addition'}" style="padding-left: 10px; border-left: 1px solid #333; font-size: 0.85rem;">
-                                <span>${gr.type === 'original' ? 'Kept' : 'Generated'}: ${gr.rule}</span>
+                            <div class="rule-item-reasoning ${gr.type === 'original' ? 'kept' : 'addition'}">
+                                <div class="rule-main">
+                                    <span class="rule-badge ${gr.type}">${gr.type === 'original' ? '✓ Kept' : '+ New'}</span>
+                                    <span class="rule-text">${gr.rule}</span>
+                                </div>
+                                ${gr.reasoning ? `<div class="reasoning-inline">${gr.reasoning}</div>` : ''}
                             </div>
                         `).join("")}
                     </div>
                 </div>`;
             }).join('') + `</div>`;
+
+        // ============ NULL REMOVAL ============
+        } else if (log.type === "null_removal") {
+            if (log.removed_epsilon_rules && log.removed_epsilon_rules.length > 0) {
+                details = `<div class="rule-list">`;
+                for (const rr of log.removed_epsilon_rules) {
+                    details += `<div class="rule-item-reasoning removal">
+                        <div class="rule-main"><span class="rule-badge removal">✕ Removed</span><span class="rule-text">${rr.rule}</span></div>
+                        <div class="reasoning-inline">${rr.reasoning}</div>
+                    </div>`;
+                }
+                details += `</div>`;
+            }
+
+        // ============ UNIT IDENTIFICATION ============
+        } else if (log.type === "unit_identification") {
+            const unitReasons = log.identification_reasoning?.filter(r => r.is_unit !== false) || [];
+            const nonUnitReasons = log.identification_reasoning?.filter(r => r.is_unit === false) || [];
+            details = `<div class="rule-list">`;
+            if (unitReasons.length > 0) {
+                details += `<div class="reasoning-sub-title" style="color:#f59e0b;">Unit Productions Found</div>`;
+                for (const ur of unitReasons) {
+                    details += `<div class="rule-item-reasoning removal">
+                        <div class="rule-main"><span class="rule-badge unit">⚠ Unit</span><span class="rule-text">${ur.rule}</span></div>
+                        <div class="reasoning-inline">${ur.reasoning}</div>
+                    </div>`;
+                }
+            }
+            if (nonUnitReasons.length > 0) {
+                details += `<details class="reasoning-details"><summary class="reasoning-details-summary">Non-unit productions (${nonUnitReasons.length})</summary>`;
+                for (const nr of nonUnitReasons) {
+                    details += `<div class="rule-item-reasoning kept">
+                        <div class="rule-main"><span class="rule-badge kept">✓ OK</span><span class="rule-text">${nr.rule}</span></div>
+                        <div class="reasoning-inline">${nr.reasoning}</div>
+                    </div>`;
+                }
+                details += `</details>`;
+            }
+            details += `</div>`;
+
+        // ============ CLOSURE CALCULATION ============
+        } else if (log.type === "closure_calculation") {
+            details = `<div class="rule-list">`;
+            // Show final closures
+            if (log.closure) {
+                for (const k in log.closure) {
+                    details += `<div class="rule-item" style="color:#93c5fd;">D(${k}) = { ${log.closure[k].join(', ')} }</div>`;
+                }
+            }
+            // Show closure reasoning iterations
+            if (log.closure_reasoning && log.closure_reasoning.length > 0) {
+                details += `<div class="reasoning-trace" style="margin-top: 12px;">`;
+                details += `<div class="reasoning-trace-title">Closure Construction Trace</div>`;
+                for (const iter of log.closure_reasoning) {
+                    details += `<div class="iteration-block">`;
+                    details += `<div class="iteration-header">${iter.description}</div>`;
+                    for (const exp of iter.expansions) {
+                        if (exp.new_additions.length > 0) {
+                            for (const add of exp.new_additions) {
+                                details += `<div class="reasoning-step method-transitive">
+                                    <span class="reasoning-icon">🔗</span>
+                                    <div class="reasoning-body">
+                                        <div class="reasoning-rule">D(${exp.variable}): +${add.added} via ${add.via}</div>
+                                        <div class="reasoning-text">${add.reasoning}</div>
+                                    </div>
+                                </div>`;
+                            }
+                            details += `<div class="iteration-result">D(${exp.variable}) = { ${exp.closure.join(', ')} }</div>`;
+                        }
+                    }
+                    details += `</div>`;
+                }
+                details += `</div>`;
+            }
+            details += `</div>`;
+
+        // ============ UNIT REPLACEMENT ============
         } else if (log.type === "unit_replacement") {
             const cLine = `<div class="concept-line" style="border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.04); color: #93c5fd;">Unit productions (A → B) introduce unnecessary indirection. We compute the full derivation closure for each variable and substitute them with direct productions.</div>`;
             details = cLine + `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
@@ -235,16 +347,104 @@ function buildHtmlLogs(logs) {
                 <div class="rule-transform-container" style="margin-bottom: 15px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6;">
                     <div style="font-weight: 600; color: #fff; margin-bottom: 8px;">Variable: ${rt.non_terminal}</div>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        ${rt.removed_units.map(ru => `<div class="rule-item removal" style="padding-left: 10px; border-left: 1px solid #333; font-size: 0.85rem;">Removed Unit: ${ru}</div>`).join('')}
-                        ${rt.added_productions.map(ap => `<div class="rule-item addition" style="padding-left: 10px; border-left: 1px solid #333; font-size: 0.85rem;">Generated: ${ap.rule}</div>`).join('')}
+                        ${rt.removed_units.map(ru => `
+                            <div class="rule-item-reasoning removal">
+                                <div class="rule-main"><span class="rule-badge removal">✕ Removed</span><span class="rule-text">${ru.rule}</span></div>
+                                <div class="reasoning-inline">${ru.reasoning}</div>
+                            </div>
+                        `).join('')}
+                        ${rt.added_productions.map(ap => `
+                            <div class="rule-item-reasoning addition">
+                                <div class="rule-main"><span class="rule-badge generated">+ Inherited</span><span class="rule-text">${ap.rule}</span></div>
+                                <div class="derivation-chain">
+                                    <span class="chain-label">Chain:</span> <span class="chain-path">${ap.via_unit}</span>
+                                    ${ap.derived_from ? `<span class="chain-arrow">→</span><span class="chain-source">${ap.derived_from}</span>` : ''}
+                                </div>
+                                <div class="reasoning-inline">${ap.reasoning}</div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>`;
             }).join('') + `</div>`;
-        } else if (log.type === "phase1" || log.type === "phase2") {
+
+        // ============ PHASE 1 (Productive) ============
+        } else if (log.type === "phase1") {
             details = `<div class="rule-list">`;
-            if (log.removed_symbols?.length > 0) details += `<div class="rule-item removal">Removed Symbols: { ${log.removed_symbols.join(', ')} }</div>`;
-            log.removed_rules?.forEach(rr => details += `<div class="rule-item removal">Removed Rule: ${rr.original_rule}</div>`);
+            // Show iteration trace
+            if (log.productive_iterations && log.productive_iterations.length > 0) {
+                details += `<div class="reasoning-trace">`;
+                details += `<div class="reasoning-trace-title">Generating Set Construction</div>`;
+                for (const iter of log.productive_iterations) {
+                    details += `<div class="iteration-block">`;
+                    details += `<div class="iteration-header">Iteration ${iter.iteration} — Found productive: { ${iter.found.join(', ')} }</div>`;
+                    for (const step of iter.reasoning_steps) {
+                        const methodIcon = step.method === 'direct' ? '⚡' : '🔗';
+                        const methodClass = step.method === 'direct' ? 'method-direct' : 'method-transitive';
+                        details += `<div class="reasoning-step ${methodClass}">
+                            <span class="reasoning-icon">${methodIcon}</span>
+                            <div class="reasoning-body">
+                                <div class="reasoning-rule">${step.rule_used}</div>
+                                <div class="reasoning-text">${step.reason}</div>
+                            </div>
+                        </div>`;
+                    }
+                    details += `<div class="iteration-result">Generating so far: { ${iter.productive_so_far.join(', ')} }</div>`;
+                    details += `</div>`;
+                }
+                details += `</div>`;
+            }
+            if (log.removed_symbols?.length > 0) details += `<div class="rule-item removal" style="margin-top:10px;">Non-Productive Symbols: { ${log.removed_symbols.join(', ')} }</div>`;
+            log.removed_rules?.forEach(rr => {
+                details += `<div class="rule-item-reasoning removal">
+                    <div class="rule-main"><span class="rule-badge removal">✕</span><span class="rule-text">${rr.original_rule}</span></div>
+                    ${rr.reasoning ? `<div class="reasoning-inline">${rr.reasoning}</div>` : ''}
+                </div>`;
+            });
             details += `</div>`;
+
+        // ============ PHASE 2 (Reachable) ============
+        } else if (log.type === "phase2") {
+            details = `<div class="rule-list">`;
+            // Show BFS trace
+            if (log.bfs_trace && log.bfs_trace.length > 0) {
+                details += `<div class="reasoning-trace">`;
+                details += `<div class="reasoning-trace-title">BFS Reachability Traversal</div>`;
+                for (const step of log.bfs_trace) {
+                    details += `<div class="iteration-block">`;
+                    details += `<div class="iteration-header">Step ${step.step}: Visit ${step.visiting}</div>`;
+                    if (step.discovered.length > 0) {
+                        for (const disc of step.discovered) {
+                            details += `<div class="reasoning-step method-direct">
+                                <span class="reasoning-icon">🔍</span>
+                                <div class="reasoning-body">
+                                    <div class="reasoning-rule">${disc.via_rule}</div>
+                                    <div class="reasoning-text">${disc.reasoning}</div>
+                                </div>
+                            </div>`;
+                        }
+                    } else {
+                        details += `<div class="reasoning-step method-direct">
+                            <span class="reasoning-icon">📍</span>
+                            <div class="reasoning-body">
+                                <div class="reasoning-text">${step.reasoning}</div>
+                            </div>
+                        </div>`;
+                    }
+                    details += `<div class="iteration-result">Reachable so far: { ${step.reachable_so_far.join(', ')} }</div>`;
+                    details += `</div>`;
+                }
+                details += `</div>`;
+            }
+            if (log.removed_symbols?.length > 0) details += `<div class="rule-item removal" style="margin-top:10px;">Unreachable Symbols: { ${log.removed_symbols.join(', ')} }</div>`;
+            log.removed_rules?.forEach(rr => {
+                details += `<div class="rule-item-reasoning removal">
+                    <div class="rule-main"><span class="rule-badge removal">✕</span><span class="rule-text">${rr.original_rule}</span></div>
+                    ${rr.reasoning ? `<div class="reasoning-inline">${rr.reasoning}</div>` : ''}
+                </div>`;
+            });
+            details += `</div>`;
+
+        // ============ SUMMARY ============
         } else if (log.type === "summary-clear") {
             details = `<div class="rule-list"><div class="rule-item addition" style="color: #34d399; font-weight: bold; padding: 10px; border-left: 3px solid #34d399; background: rgba(52, 211, 153, 0.1);">✓ VALIDATION PASSED</div></div>`;
         } else if (log.type === "summary-warning") {

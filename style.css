@@ -864,7 +864,290 @@ select.builder-input {
     color: #888;
 }
 
-/* Obsolete log details styles removed as logs are now displayed flat. */
+/* ===== Reasoning Trace Styles ===== */
+
+.reasoning-trace {
+    margin-top: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.reasoning-trace-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #666;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.iteration-block {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.iteration-block:last-child {
+    border-bottom: none;
+}
+
+.iteration-header {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #a78bfa;
+    margin-bottom: 8px;
+    padding: 4px 0;
+}
+
+.iteration-result {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 6px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+}
+
+.reasoning-step {
+    display: flex;
+    gap: 10px;
+    padding: 6px 8px;
+    margin: 4px 0;
+    border-radius: 6px;
+    border-left: 2px solid transparent;
+    transition: background 0.15s;
+}
+
+.reasoning-step:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.reasoning-step.method-direct {
+    border-left-color: #10b981;
+}
+
+.reasoning-step.method-transitive {
+    border-left-color: #3b82f6;
+}
+
+.reasoning-icon {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.reasoning-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.reasoning-rule {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: #e2e8f0;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.reasoning-text {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    line-height: 1.4;
+}
+
+/* Rule Item with Reasoning */
+.rule-item-reasoning {
+    padding: 8px 10px;
+    margin: 3px 0;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.15s;
+}
+
+.rule-item-reasoning:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.rule-item-reasoning.addition {
+    border-left: 2px solid #10b981;
+}
+
+.rule-item-reasoning.removal {
+    border-left: 2px solid #ef4444;
+}
+
+.rule-item-reasoning.kept {
+    border-left: 2px solid #4a5568;
+}
+
+.rule-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.rule-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    font-family: 'Outfit', sans-serif;
+}
+
+.rule-badge.original,
+.rule-badge.kept {
+    background: rgba(74, 85, 104, 0.3);
+    color: #94a3b8;
+}
+
+.rule-badge.generated {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.rule-badge.removal {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+.rule-badge.unit {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.rule-text {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+}
+
+.reasoning-inline {
+    font-size: 0.78rem;
+    color: #64748b;
+    line-height: 1.4;
+    padding-left: 2px;
+    margin-top: 2px;
+}
+
+/* Derivation Chain */
+.derivation-chain {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.78rem;
+    padding: 3px 0;
+    flex-wrap: wrap;
+    margin-bottom: 2px;
+}
+
+.chain-label {
+    color: #64748b;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    letter-spacing: 0.5px;
+}
+
+.chain-path {
+    color: #a78bfa;
+    font-weight: 500;
+}
+
+.chain-arrow {
+    color: #4a5568;
+}
+
+.chain-source {
+    color: #10b981;
+}
+
+/* Nullable Positions */
+.nullable-positions {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 4px 0 4px 0;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.pos-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    background: rgba(251, 191, 36, 0.12);
+    color: #fbbf24;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.pos-badge sub {
+    font-size: 0.6rem;
+    color: #f59e0b;
+    opacity: 0.7;
+}
+
+/* Collapsible Reasoning Details */
+.reasoning-details {
+    margin-top: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.reasoning-details-summary {
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    color: #64748b;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.02);
+    user-select: none;
+    transition: color 0.15s, background 0.15s;
+}
+
+.reasoning-details-summary:hover {
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.reasoning-details[open] .reasoning-details-summary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.reasoning-sub-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 0;
+    margin-bottom: 4px;
+}
+
+/* Concept Line */
+.concept-line {
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-left: 3px solid #10b981;
+    background: rgba(16, 185, 129, 0.04);
+    color: #94a3b8;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border-radius: 0 6px 6px 0;
+}
 
 .rule-transform-container:last-child {
     border-bottom: none !important;
