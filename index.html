@@ -250,8 +250,9 @@ D -> d"></textarea>
                     </div>
                 </div>
 
-                <div class="panel-actions center-actions" style="border-top: none; padding-top: 0;">
+                <div class="panel-actions center-actions" style="border-top: none; padding-top: 0; gap: 1rem;">
                     <button class="btn btn-primary btn-large" id="btn-start">Execute Simplification Pipeline</button>
+                    <button class="btn btn-secondary btn-large" id="btn-step-by-step" style="border-color:#6366f1;color:#6366f1;">Step-by-Step Walkthrough</button>
                 </div>
             </section>
 
@@ -543,6 +544,40 @@ minimal and stable. A status banner will appear below to confirm.
 
         </main>
     </div>
+
+    <!-- STEP-BY-STEP MODE -->
+    <section id="sbs-view" class="hidden">
+        <div class="sbs-container">
+            <div class="sbs-controls-bar">
+                <button id="btn-sbs-prev" class="btn btn-secondary" disabled>Prev</button>
+                <div class="sbs-progress">
+                    <div id="sbs-stage-label" class="sbs-stage-label">Original Grammar</div>
+                    <div class="sbs-counter-row">
+                        <span id="sbs-counter" class="sbs-counter">1 / 1</span>
+                        <div class="sbs-progress-track">
+                            <div class="sbs-progress-fill" id="sbs-progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-sbs-next" class="btn btn-secondary">Next</button>
+                <button id="btn-sbs-auto" class="btn btn-primary" style="background:#6366f1;border-color:#4f46e5;min-width:100px;">Auto</button>
+                <button id="btn-sbs-exit" class="btn btn-secondary" style="border-color:var(--danger);color:var(--danger);">Exit</button>
+            </div>
+
+            <div class="sbs-main">
+                <div class="sbs-graph-wrapper">
+                    <div id="sbs-network" class="network-canvas"></div>
+                    <div class="sbs-grammar-state">
+                        <div class="sbs-grammar-header">Current Grammar State</div>
+                        <div id="sbs-grammar-content" class="sbs-grammar-content" style="font-family: 'Fira Code', monospace; font-size: 0.95rem; color: #fff;"></div>
+                    </div>
+                </div>
+                <div class="sbs-carousel-wrapper">
+                    <div class="sbs-carousel" id="sbs-carousel"></div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <script type="module" src="app.js"></script>
 </body>

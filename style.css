@@ -830,6 +830,94 @@ select.builder-input {
     line-height: 1.5;
 }
 
+/* Per-Rule Reasoning Toggle */
+.rule-item-reasoning {
+    cursor: pointer;
+}
+
+.rule-item-reasoning .reasoning-inline {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease;
+    margin-top: 0;
+}
+
+.rule-item-reasoning.show-reasoning .reasoning-inline {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 4px;
+}
+
+.rule-item-reasoning .derivation-chain {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease;
+    margin-bottom: 0;
+}
+
+.rule-item-reasoning.show-reasoning .derivation-chain {
+    max-height: 60px;
+    opacity: 1;
+    margin-bottom: 2px;
+}
+
+/* Reasoning Chevron on each rule */
+.reasoning-chevron {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: auto;
+    flex-shrink: 0;
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reasoning-chevron::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid #555;
+    border-bottom: 1.5px solid #555;
+    transform: rotate(-45deg);
+    transition: border-color 0.2s;
+}
+
+.rule-item-reasoning:hover .reasoning-chevron::before {
+    border-color: #999;
+}
+
+.rule-item-reasoning.show-reasoning .reasoning-chevron {
+    transform: rotate(90deg);
+}
+
+.rule-item-reasoning.show-reasoning .reasoning-chevron::before {
+    border-color: var(--success);
+}
+
+/* Per-Step Reasoning Toggle (iteration trace steps) */
+.reasoning-step {
+    cursor: pointer;
+}
+
+.reasoning-step .reasoning-text {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease;
+    margin-top: 0;
+}
+
+.reasoning-step.show-reasoning .reasoning-text {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 2px;
+}
+
 .log-entry .rule-list {
     margin-top: 8px;
     padding: 8px;
@@ -934,10 +1022,24 @@ select.builder-input {
     border-left-color: #3b82f6;
 }
 
-.reasoning-icon {
+.reasoning-dot {
     flex-shrink: 0;
-    font-size: 0.85rem;
-    line-height: 1.5;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 6px;
+    background: #4a5568;
+    transition: background 0.2s;
+}
+
+.reasoning-step.method-direct .reasoning-dot {
+    background: #10b981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.reasoning-step.method-transitive .reasoning-dot {
+    background: #3b82f6;
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
 }
 
 .reasoning-body {
@@ -989,7 +1091,7 @@ select.builder-input {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 0;
 }
 
 .rule-badge {
@@ -1471,8 +1573,13 @@ select.builder-input {
 }
 
 .concept-line::before {
-    content: '💡';
-    font-size: 1rem;
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
 }
 
 .algo-details {
@@ -1659,4 +1766,245 @@ html {
     .stage-navigator {
         right: 15px;
     }
+}
+
+/* ================= STEP-BY-STEP MODE CSS ================= */
+#sbs-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #050505;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+#sbs-view.hidden {
+    display: none !important;
+}
+
+.sbs-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.sbs-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 30px;
+    background: #0f0f0f;
+    border-bottom: 1px solid #222;
+}
+
+.sbs-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 500px;
+    margin: 0 20px;
+}
+
+.sbs-stage-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.sbs-counter-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+}
+
+.sbs-counter {
+    font-size: 0.85rem;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.sbs-progress-track {
+    flex: 1;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.sbs-progress-fill {
+    height: 100%;
+    background: #fff;
+    width: 0%;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.sbs-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.sbs-graph-wrapper {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: transparent;
+    gap: 20px;
+}
+
+#sbs-network {
+    flex: 1;
+    border-radius: 6px;
+    border: 1px solid #222;
+    background-color: #080808;
+    background-image: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="%231a1a1a" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)" /></svg>');
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+.sbs-grammar-state {
+    flex: 0 0 auto;
+    background-color: #0b0b0b;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    max-height: 250px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.sbs-grammar-header {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #222;
+    padding-bottom: 8px;
+}
+
+.sbs-grammar-content {
+    overflow-y: auto;
+    line-height: 1.6;
+    scrollbar-width: thin;
+    scrollbar-color: #444 transparent;
+}
+
+.sbs-carousel-wrapper {
+    flex: 1;
+    border-left: 1px solid #222;
+    background: transparent;
+    overflow-y: auto;
+    padding: 30px 40px;
+    position: relative;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+}
+.sbs-carousel-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.sbs-carousel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 35vh 0; /* Ensures first/last can reach center heavily */
+}
+
+.sbs-step {
+    padding: 20px;
+    border-radius: 6px;
+    background: #0f0f0f;
+    border: 1px solid #222;
+    border-left: 4px solid var(--step-color, #666);
+    transition: all 0.4s ease;
+    opacity: 0.15;
+    transform: scale(0.9);
+    position: relative;
+    overflow: hidden;
+}
+
+.sbs-step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, var(--step-color), transparent);
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.sbs-step.past {
+    opacity: 0.3;
+    transform: scale(0.9);
+}
+
+.sbs-step.future {
+    opacity: 0.2;
+    transform: scale(0.9);
+}
+
+.sbs-step.current {
+    opacity: 1;
+    transform: scale(1);
+    background: #111;
+    border-color: #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+.sbs-step-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+}
+
+.sbs-step-rule {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 10px;
+    padding-right: 60px;
+}
+
+.sbs-step-reasoning {
+    display: none;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #333;
+}
+
+.sbs-step.current .sbs-step-reasoning {
+    display: block;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.sbs-step-stage {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }

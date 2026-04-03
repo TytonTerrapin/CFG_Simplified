@@ -223,10 +223,9 @@ function buildHtmlLogs(logs) {
                     details += `<div class="iteration-block">`;
                     details += `<div class="iteration-header">Iteration ${iter.iteration} — Found: { ${iter.found.join(', ')} }</div>`;
                     for (const step of iter.reasoning_steps) {
-                        const methodIcon = step.method === 'direct' ? '⚡' : '🔗';
                         const methodClass = step.method === 'direct' ? 'method-direct' : 'method-transitive';
-                        details += `<div class="reasoning-step ${methodClass}">
-                            <span class="reasoning-icon">${methodIcon}</span>
+                        details += `<div class="reasoning-step ${methodClass}" onclick="this.classList.toggle('show-reasoning')">
+                            <span class="reasoning-dot"></span>
                             <div class="reasoning-body">
                                 <div class="reasoning-rule">${step.rule_used}</div>
                                 <div class="reasoning-text">${step.reason}</div>
@@ -252,10 +251,11 @@ function buildHtmlLogs(logs) {
                     ${nullableInfo}
                     <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
                         ${rt.generated_rules.map(gr => `
-                            <div class="rule-item-reasoning ${gr.type === 'original' ? 'kept' : 'addition'}">
+                            <div class="rule-item-reasoning ${gr.type === 'original' ? 'kept' : 'addition'}" onclick="this.classList.toggle('show-reasoning')">
                                 <div class="rule-main">
-                                    <span class="rule-badge ${gr.type}">${gr.type === 'original' ? '✓ Kept' : '+ New'}</span>
+                                    <span class="rule-badge ${gr.type}">${gr.type === 'original' ? 'Kept' : 'New'}</span>
                                     <span class="rule-text">${gr.rule}</span>
+                                    ${gr.reasoning ? `<span class="reasoning-chevron"></span>` : ''}
                                 </div>
                                 ${gr.reasoning ? `<div class="reasoning-inline">${gr.reasoning}</div>` : ''}
                             </div>
@@ -269,8 +269,8 @@ function buildHtmlLogs(logs) {
             if (log.removed_epsilon_rules && log.removed_epsilon_rules.length > 0) {
                 details = `<div class="rule-list">`;
                 for (const rr of log.removed_epsilon_rules) {
-                    details += `<div class="rule-item-reasoning removal">
-                        <div class="rule-main"><span class="rule-badge removal">✕ Removed</span><span class="rule-text">${rr.rule}</span></div>
+                    details += `<div class="rule-item-reasoning removal" onclick="this.classList.toggle('show-reasoning')">
+                        <div class="rule-main"><span class="rule-badge removal">Removed</span><span class="rule-text">${rr.rule}</span><span class="reasoning-chevron"></span></div>
                         <div class="reasoning-inline">${rr.reasoning}</div>
                     </div>`;
                 }
@@ -285,8 +285,8 @@ function buildHtmlLogs(logs) {
             if (unitReasons.length > 0) {
                 details += `<div class="reasoning-sub-title" style="color:#f59e0b;">Unit Productions Found</div>`;
                 for (const ur of unitReasons) {
-                    details += `<div class="rule-item-reasoning removal">
-                        <div class="rule-main"><span class="rule-badge unit">⚠ Unit</span><span class="rule-text">${ur.rule}</span></div>
+                    details += `<div class="rule-item-reasoning removal" onclick="this.classList.toggle('show-reasoning')">
+                        <div class="rule-main"><span class="rule-badge unit">Unit</span><span class="rule-text">${ur.rule}</span><span class="reasoning-chevron"></span></div>
                         <div class="reasoning-inline">${ur.reasoning}</div>
                     </div>`;
                 }
@@ -294,8 +294,8 @@ function buildHtmlLogs(logs) {
             if (nonUnitReasons.length > 0) {
                 details += `<details class="reasoning-details"><summary class="reasoning-details-summary">Non-unit productions (${nonUnitReasons.length})</summary>`;
                 for (const nr of nonUnitReasons) {
-                    details += `<div class="rule-item-reasoning kept">
-                        <div class="rule-main"><span class="rule-badge kept">✓ OK</span><span class="rule-text">${nr.rule}</span></div>
+                    details += `<div class="rule-item-reasoning kept" onclick="this.classList.toggle('show-reasoning')">
+                        <div class="rule-main"><span class="rule-badge kept">OK</span><span class="rule-text">${nr.rule}</span><span class="reasoning-chevron"></span></div>
                         <div class="reasoning-inline">${nr.reasoning}</div>
                     </div>`;
                 }
@@ -322,8 +322,8 @@ function buildHtmlLogs(logs) {
                     for (const exp of iter.expansions) {
                         if (exp.new_additions.length > 0) {
                             for (const add of exp.new_additions) {
-                                details += `<div class="reasoning-step method-transitive">
-                                    <span class="reasoning-icon">🔗</span>
+                                details += `<div class="reasoning-step method-transitive" onclick="this.classList.toggle('show-reasoning')">
+                                    <span class="reasoning-dot"></span>
                                     <div class="reasoning-body">
                                         <div class="reasoning-rule">D(${exp.variable}): +${add.added} via ${add.via}</div>
                                         <div class="reasoning-text">${add.reasoning}</div>
@@ -348,18 +348,15 @@ function buildHtmlLogs(logs) {
                     <div style="font-weight: 600; color: #fff; margin-bottom: 8px;">Variable: ${rt.non_terminal}</div>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
                         ${rt.removed_units.map(ru => `
-                            <div class="rule-item-reasoning removal">
-                                <div class="rule-main"><span class="rule-badge removal">✕ Removed</span><span class="rule-text">${ru.rule}</span></div>
+                            <div class="rule-item-reasoning removal" onclick="this.classList.toggle('show-reasoning')">
+                                <div class="rule-main"><span class="rule-badge removal">Removed</span><span class="rule-text">${ru.rule}</span><span class="reasoning-chevron"></span></div>
                                 <div class="reasoning-inline">${ru.reasoning}</div>
                             </div>
                         `).join('')}
                         ${rt.added_productions.map(ap => `
-                            <div class="rule-item-reasoning addition">
-                                <div class="rule-main"><span class="rule-badge generated">+ Inherited</span><span class="rule-text">${ap.rule}</span></div>
-                                <div class="derivation-chain">
-                                    <span class="chain-label">Chain:</span> <span class="chain-path">${ap.via_unit}</span>
-                                    ${ap.derived_from ? `<span class="chain-arrow">→</span><span class="chain-source">${ap.derived_from}</span>` : ''}
-                                </div>
+                            <div class="rule-item-reasoning addition" onclick="this.classList.toggle('show-reasoning')">
+                                <div class="rule-main"><span class="rule-badge generated">Inherited</span><span class="rule-text">${ap.rule}</span><span class="reasoning-chevron"></span></div>
+                                <div class="derivation-chain">${ap.derived_from ? `<span class="chain-label">Chain:</span> <span class="chain-path">${ap.via_unit}</span><span class="chain-arrow">→</span><span class="chain-source">${ap.derived_from}</span>` : ''}</div>
                                 <div class="reasoning-inline">${ap.reasoning}</div>
                             </div>
                         `).join('')}
@@ -378,10 +375,9 @@ function buildHtmlLogs(logs) {
                     details += `<div class="iteration-block">`;
                     details += `<div class="iteration-header">Iteration ${iter.iteration} — Found productive: { ${iter.found.join(', ')} }</div>`;
                     for (const step of iter.reasoning_steps) {
-                        const methodIcon = step.method === 'direct' ? '⚡' : '🔗';
                         const methodClass = step.method === 'direct' ? 'method-direct' : 'method-transitive';
-                        details += `<div class="reasoning-step ${methodClass}">
-                            <span class="reasoning-icon">${methodIcon}</span>
+                        details += `<div class="reasoning-step ${methodClass}" onclick="this.classList.toggle('show-reasoning')">
+                            <span class="reasoning-dot"></span>
                             <div class="reasoning-body">
                                 <div class="reasoning-rule">${step.rule_used}</div>
                                 <div class="reasoning-text">${step.reason}</div>
@@ -395,8 +391,8 @@ function buildHtmlLogs(logs) {
             }
             if (log.removed_symbols?.length > 0) details += `<div class="rule-item removal" style="margin-top:10px;">Non-Productive Symbols: { ${log.removed_symbols.join(', ')} }</div>`;
             log.removed_rules?.forEach(rr => {
-                details += `<div class="rule-item-reasoning removal">
-                    <div class="rule-main"><span class="rule-badge removal">✕</span><span class="rule-text">${rr.original_rule}</span></div>
+                details += `<div class="rule-item-reasoning removal" onclick="this.classList.toggle('show-reasoning')">
+                    <div class="rule-main"><span class="rule-badge removal">Removed</span><span class="rule-text">${rr.original_rule}</span>${rr.reasoning ? `<span class="reasoning-chevron"></span>` : ''}</div>
                     ${rr.reasoning ? `<div class="reasoning-inline">${rr.reasoning}</div>` : ''}
                 </div>`;
             });
@@ -414,8 +410,8 @@ function buildHtmlLogs(logs) {
                     details += `<div class="iteration-header">Step ${step.step}: Visit ${step.visiting}</div>`;
                     if (step.discovered.length > 0) {
                         for (const disc of step.discovered) {
-                            details += `<div class="reasoning-step method-direct">
-                                <span class="reasoning-icon">🔍</span>
+                            details += `<div class="reasoning-step method-direct" onclick="this.classList.toggle('show-reasoning')">
+                                <span class="reasoning-dot"></span>
                                 <div class="reasoning-body">
                                     <div class="reasoning-rule">${disc.via_rule}</div>
                                     <div class="reasoning-text">${disc.reasoning}</div>
@@ -423,8 +419,8 @@ function buildHtmlLogs(logs) {
                             </div>`;
                         }
                     } else {
-                        details += `<div class="reasoning-step method-direct">
-                            <span class="reasoning-icon">📍</span>
+                        details += `<div class="reasoning-step method-direct" onclick="this.classList.toggle('show-reasoning')">
+                            <span class="reasoning-dot"></span>
                             <div class="reasoning-body">
                                 <div class="reasoning-text">${step.reasoning}</div>
                             </div>
@@ -437,8 +433,8 @@ function buildHtmlLogs(logs) {
             }
             if (log.removed_symbols?.length > 0) details += `<div class="rule-item removal" style="margin-top:10px;">Unreachable Symbols: { ${log.removed_symbols.join(', ')} }</div>`;
             log.removed_rules?.forEach(rr => {
-                details += `<div class="rule-item-reasoning removal">
-                    <div class="rule-main"><span class="rule-badge removal">✕</span><span class="rule-text">${rr.original_rule}</span></div>
+                details += `<div class="rule-item-reasoning removal" onclick="this.classList.toggle('show-reasoning')">
+                    <div class="rule-main"><span class="rule-badge removal">Removed</span><span class="rule-text">${rr.original_rule}</span>${rr.reasoning ? `<span class="reasoning-chevron"></span>` : ''}</div>
                     ${rr.reasoning ? `<div class="reasoning-inline">${rr.reasoning}</div>` : ''}
                 </div>`;
             });
@@ -446,9 +442,9 @@ function buildHtmlLogs(logs) {
 
         // ============ SUMMARY ============
         } else if (log.type === "summary-clear") {
-            details = `<div class="rule-list"><div class="rule-item addition" style="color: #34d399; font-weight: bold; padding: 10px; border-left: 3px solid #34d399; background: rgba(52, 211, 153, 0.1);">✓ VALIDATION PASSED</div></div>`;
+            details = `<div class="rule-list"><div class="rule-item addition" style="color: #34d399; font-weight: bold; padding: 10px; border-left: 3px solid #34d399; background: rgba(52, 211, 153, 0.1);">VALIDATION PASSED</div></div>`;
         } else if (log.type === "summary-warning") {
-            details = `<div class="rule-list"><div class="rule-item removal" style="color: #f87171; font-weight: bold; padding: 10px; border-left: 3px solid #f87171; background: rgba(248, 113, 113, 0.1);">⚠ VALIDATION FAILED</div></div>`;
+            details = `<div class="rule-list"><div class="rule-item removal" style="color: #f87171; font-weight: bold; padding: 10px; border-left: 3px solid #f87171; background: rgba(248, 113, 113, 0.1);">VALIDATION FAILED</div></div>`;
         }
         return `<div class="log-entry"><h4>${log.title}</h4><p>${log.description}</p>${conceptLine}${details}</div>`;
     }).join('');
@@ -659,8 +655,8 @@ function runFullPipeline() {
         step_logs: [{
             title: isStable ? "Validation Passed: Grammar is Stable" : "Validation Warning: Grammar is Unstable",
             description: isStable ? 
-                "✓ CLEAR: The rigorous mathematical validation has completed. Re-running the entire normalization pipeline on this output yielded no further reductions. The grammar is perfectly stable and minimized." : 
-                "⚠ WARNING: The grammar required further reductions on a second pass. This indicates cyclic anomalies or unhandled edge cases.",
+                "CLEAR: The rigorous mathematical validation has completed. Re-running the entire normalization pipeline on this output yielded no further reductions. The grammar is perfectly stable and minimized." : 
+                "WARNING: The grammar required further reductions on a second pass. This indicates cyclic anomalies or unhandled edge cases.",
             type: isStable ? "summary-clear" : "summary-warning"
         }]
     };
@@ -800,6 +796,532 @@ DOM.btnAutoPlay.addEventListener('click', () => {
             }
         }, 3000);
     }
+});
+
+// =================== STEP-BY-STEP MODE ===================
+
+const SBS = {
+    view: document.getElementById('sbs-view'),
+    network: document.getElementById('sbs-network'),
+    carousel: document.getElementById('sbs-carousel'),
+    stageLabel: document.getElementById('sbs-stage-label'),
+    counter: document.getElementById('sbs-counter'),
+    progressFill: document.getElementById('sbs-progress-fill'),
+    btnPrev: document.getElementById('btn-sbs-prev'),
+    btnNext: document.getElementById('btn-sbs-next'),
+    btnAuto: document.getElementById('btn-sbs-auto'),
+    btnExit: document.getElementById('btn-sbs-exit'),
+    btnEnter: document.getElementById('btn-step-by-step'),
+    grammarContent: document.getElementById('sbs-grammar-content'),
+};
+
+let sbsSteps = [];
+let sbsCurrentStep = 0;
+let sbsAutoInterval = null;
+let sbsVisNodes = null;
+let sbsVisEdges = null;
+let sbsNetworkInstance = null;
+
+function flattenPipelineSteps() {
+    const steps = [];
+    let runningGrammar = deepCopy(pipelineHistory[0].grammar);
+    const STAGE_COLORS = { 1: '#10b981', 2: '#3b82f6', 3: '#ef4444' };
+    const STAGE_NAMES = { 1: 'Null Productions', 2: 'Unit Productions', 3: 'Useless Symbols' };
+    const STAGE_DESCS = {
+        1: 'Nullable variables are identified and alternative productions are generated. Then all \u03b5-productions are removed.',
+        2: 'Unit productions (A \u2192 B) are replaced with non-unit productions reachable through the derivation closure.',
+        3: 'Non-productive and unreachable symbols are identified and removed from the grammar.'
+    };
+
+    steps.push({
+        stage: 'Original Grammar', stageIdx: 0, color: '#94a3b8',
+        action: 'info', title: 'Original Grammar',
+        rule: Object.keys(runningGrammar).map(k => `${k} \u2192 ${runningGrammar[k].map(r => r || '\u03b5').join(' | ')}`).join('\n'),
+        reasoning: 'This is the starting grammar before any simplification is applied.',
+        grammarBefore: deepCopy(runningGrammar), grammarAfter: deepCopy(runningGrammar),
+    });
+
+    for (let si = 1; si <= 3; si++) {
+        const stage = pipelineHistory[si];
+        const prevGrammar = pipelineHistory[si - 1].grammar;
+        const afterGrammar = stage.grammar;
+        const color = STAGE_COLORS[si];
+        const stageName = `Stage ${si}: ${STAGE_NAMES[si]}`;
+
+        const removals = [], additions = [];
+        for (const lhs in prevGrammar) {
+            for (const rhs of prevGrammar[lhs]) {
+                if (!afterGrammar[lhs] || !afterGrammar[lhs].includes(rhs))
+                    removals.push({ lhs, rhs });
+            }
+        }
+        for (const lhs in afterGrammar) {
+            for (const rhs of afterGrammar[lhs]) {
+                if (!prevGrammar[lhs] || !prevGrammar[lhs].includes(rhs))
+                    additions.push({ lhs, rhs });
+            }
+        }
+
+        if (additions.length === 0 && removals.length === 0) {
+            steps.push({
+                stage: stageName, stageIdx: si, color, action: 'info',
+                title: `${stageName} \u2014 No Changes`, rule: 'No modifications needed in this stage.',
+                reasoning: STAGE_DESCS[si],
+                grammarBefore: deepCopy(runningGrammar), grammarAfter: deepCopy(runningGrammar),
+            });
+            continue;
+        }
+
+        steps.push({
+            stage: stageName, stageIdx: si, color, action: 'info',
+            title: stageName,
+            rule: `${additions.length} addition${additions.length !== 1 ? 's' : ''}, ${removals.length} removal${removals.length !== 1 ? 's' : ''}`,
+            reasoning: STAGE_DESCS[si],
+            grammarBefore: deepCopy(runningGrammar), grammarAfter: deepCopy(runningGrammar),
+        });
+
+        for (const add of additions) {
+            const before = deepCopy(runningGrammar);
+            if (!runningGrammar[add.lhs]) runningGrammar[add.lhs] = [];
+            if (!runningGrammar[add.lhs].includes(add.rhs)) runningGrammar[add.lhs].push(add.rhs);
+            steps.push({
+                stage: stageName, stageIdx: si, color, action: 'added',
+                title: 'Production Added', rule: `${add.lhs} \u2192 ${add.rhs || '\u03b5'}`,
+                reasoning: findStepReasoning(stage, add.lhs, add.rhs, 'added'),
+                grammarBefore: before, grammarAfter: deepCopy(runningGrammar),
+                targetLhs: add.lhs, targetRhs: add.rhs
+            });
+        }
+
+        for (const rm of removals) {
+            const before = deepCopy(runningGrammar);
+            if (runningGrammar[rm.lhs]) {
+                runningGrammar[rm.lhs] = runningGrammar[rm.lhs].filter(r => r !== rm.rhs);
+                if (runningGrammar[rm.lhs].length === 0) delete runningGrammar[rm.lhs];
+            }
+            steps.push({
+                stage: stageName, stageIdx: si, color, action: 'removed',
+                title: 'Production Removed', rule: `${rm.lhs} \u2192 ${rm.rhs || '\u03b5'}`,
+                reasoning: findStepReasoning(stage, rm.lhs, rm.rhs, 'removed'),
+                grammarBefore: before, grammarAfter: deepCopy(runningGrammar),
+                targetLhs: rm.lhs, targetRhs: rm.rhs
+            });
+        }
+    }
+
+    steps.push({
+        stage: 'Complete', stageIdx: 4, color: '#10b981', action: 'complete',
+        title: 'Simplification Complete',
+        rule: Object.keys(runningGrammar).map(k => `${k} \u2192 ${runningGrammar[k].map(r => r || '\u03b5').join(' | ')}`).join('\n'),
+        reasoning: 'All null productions, unit productions, and useless symbols have been eliminated. The grammar is fully simplified.',
+        grammarBefore: deepCopy(runningGrammar), grammarAfter: deepCopy(runningGrammar),
+    });
+
+    return steps;
+}
+
+function findStepReasoning(stage, lhs, rhs, action) {
+    const displayRhs = rhs || '\u03b5';
+    const ruleStr = `${lhs} \u2192 ${displayRhs}`;
+    for (const log of (stage.step_logs || [])) {
+        if (log.type === 'production_generation' && log.rule_transformations && action === 'added') {
+            for (const rt of log.rule_transformations) {
+                for (const gr of rt.generated_rules) {
+                    if (gr.rule === ruleStr) return gr.reasoning || gr.reason || '';
+                }
+            }
+        }
+        if (log.type === 'null_removal' && log.removed_epsilon_rules && action === 'removed') {
+            for (const rr of log.removed_epsilon_rules) {
+                if (rr.rule === ruleStr) return rr.reasoning || '';
+            }
+        }
+        if (log.type === 'unit_replacement' && log.rule_transformations) {
+            for (const rt of log.rule_transformations) {
+                if (action === 'removed') for (const ru of rt.removed_units) { if (ru.rule === ruleStr) return ru.reasoning || ''; }
+                if (action === 'added') for (const ap of rt.added_productions) { if (ap.rule === ruleStr) return ap.reasoning || ''; }
+            }
+        }
+        if ((log.type === 'phase1' || log.type === 'phase2') && log.removed_rules && action === 'removed') {
+            for (const rr of log.removed_rules) {
+                if (rr.original_rule === ruleStr) return rr.reasoning || '';
+            }
+        }
+    }
+    return '';
+}
+
+// --- SBS Graph (persistent vis.js DataSets for smooth morphing) ---
+
+function initSbsNetwork() {
+    if (sbsNetworkInstance) { sbsNetworkInstance.destroy(); sbsNetworkInstance = null; }
+    sbsVisNodes = new vis.DataSet();
+    sbsVisEdges = new vis.DataSet();
+    sbsNetworkInstance = new vis.Network(SBS.network, { nodes: sbsVisNodes, edges: sbsVisEdges }, {
+        physics: {
+            enabled: true,
+            solver: 'forceAtlas2Based',
+            forceAtlas2Based: {
+                gravitationalConstant: -150,
+                springConstant: 0.03,
+                springLength: 120,
+                damping: 0.8,
+                avoidOverlap: 0.5
+            },
+            stabilization: { enabled: false }
+        },
+        interaction: { hover: true, tooltipDelay: 200 },
+        edges: { smooth: { type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.4 } }
+    });
+}
+
+function updateSbsGraph(step) {
+    const grammar = step.grammarAfter;
+    const prevGrammar = step.grammarBefore;
+    const isVar = (s) => s && s.length === 1 && s >= 'A' && s <= 'Z';
+
+    // Build desired nodes/edges from afterGrammar
+    const desiredNodes = new Map();
+    const desiredEdges = new Map();
+
+    for (const lhs in grammar) {
+        desiredNodes.set(lhs, { id: lhs, isVar: true });
+        for (const rhs of grammar[lhs]) {
+            if (rhs === '') {
+                desiredNodes.set('\u03b5', { id: '\u03b5', isVar: false });
+                desiredEdges.set(`${lhs}->\u03b5`, { from: lhs, to: '\u03b5' });
+            } else {
+                for (const ch of rhs) {
+                    if (ch !== ' ' && ch !== '|') {
+                        desiredNodes.set(ch, { id: ch, isVar: isVar(ch) });
+                        const ek = `${lhs}->${ch}`;
+                        if (!desiredEdges.has(ek)) desiredEdges.set(ek, { from: lhs, to: ch });
+                    }
+                }
+            }
+        }
+    }
+
+    // Also detect nodes/edges being removed (in prev but not in after) for red ghosting
+    const ghostNodes = new Set();
+    const ghostEdges = new Map();
+    for (const lhs in prevGrammar) {
+        if (!grammar[lhs]) ghostNodes.add(lhs);
+        for (const rhs of prevGrammar[lhs]) {
+            if (rhs === '') {
+                if (!grammar[lhs] || !grammar[lhs].includes('')) {
+                    ghostEdges.set(`${lhs}->\u03b5`, { from: lhs, to: '\u03b5' });
+                    if (!desiredNodes.has('\u03b5')) ghostNodes.add('\u03b5');
+                }
+            } else {
+                for (const ch of rhs) {
+                    if (ch !== ' ' && ch !== '|') {
+                        const ek = `${lhs}->${ch}`;
+                        if (!desiredEdges.has(ek) && !ghostEdges.has(ek)) {
+                            ghostEdges.set(ek, { from: lhs, to: ch });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Determine newly added nodes/edges (in after but not in prev)
+    const addedEdges = new Set();
+    for (const [ek] of desiredEdges) {
+        // Check if this edge existed before
+        let existed = false;
+        const parts = ek.split('->');
+        if (prevGrammar[parts[0]]) {
+            for (const rhs of prevGrammar[parts[0]]) {
+                const target = parts[1] === '\u03b5' ? '' : parts[1];
+                if (rhs === '' && parts[1] === '\u03b5') { existed = true; break; }
+                if (rhs.includes(target) && parts[1] !== '\u03b5') { existed = true; break; }
+            }
+        }
+        if (!existed) addedEdges.add(ek);
+    }
+
+    const currentNodeIds = new Set(sbsVisNodes.getIds());
+    const currentEdgeIds = new Set(sbsVisEdges.getIds());
+    
+    // Check if target nodes/edges are part of the current step
+    const targetLhs = step.targetLhs;
+    const targetRhs = step.targetRhs;
+    const targetNodes = new Set();
+    const targetEdges = new Set();
+    
+    if (targetLhs && targetRhs !== undefined) {
+        targetNodes.add(targetLhs);
+        if (targetRhs === '') {
+            targetNodes.add('\u03b5');
+            targetEdges.add(`${targetLhs}->\u03b5`);
+        } else {
+            for (const ch of targetRhs) {
+                if (ch !== ' ' && ch !== '|') {
+                    targetNodes.add(ch);
+                    targetEdges.add(`${targetLhs}->${ch}`);
+                }
+            }
+        }
+    }
+
+    // Add/update desired nodes
+    for (const [id, nodeInfo] of desiredNodes) {
+        let color = '#4a5568', border = '#222';
+        
+        // Highlight coloring
+        if (targetNodes.has(id)) {
+            color = step.action === 'added' ? '#10b981' : (step.action === 'removed' ? '#ef4444' : '#f59e0b');
+            border = '#fff';
+        } else if (id === 'S') { 
+            color = '#3b82f6'; border = '#2563eb'; 
+        } else if (!nodeInfo.isVar && id !== '\u03b5') { 
+            color = '#6b7280'; border = '#374151'; 
+        } else if (id === '\u03b5') { 
+            color = '#6b7280'; border = '#374151'; 
+        }
+
+        const nodeData = {
+            id, label: id,
+            color: { background: color, border, highlight: { background: color, border: '#fff' } },
+            shape: (!nodeInfo.isVar || id === '\u03b5') ? 'box' : 'circle',
+            opacity: 1,
+            borderWidth: targetNodes.has(id) ? 3 : 1,
+            shadow: targetNodes.has(id) ? { enabled: true, color: color, size: 15, x: 0, y: 0 } : false,
+            font: { color: '#fff', size: targetNodes.has(id) ? 20 : 16, strokeWidth: 1, strokeColor: '#000' }
+        };
+
+        if (currentNodeIds.has(id)) { sbsVisNodes.update(nodeData); }
+        else { sbsVisNodes.add(nodeData); }
+        currentNodeIds.delete(id);
+    }
+
+    // Ghost removed nodes (red, fading)
+    if (step.action === 'removed') {
+        for (const id of ghostNodes) {
+            if (!desiredNodes.has(id)) {
+                const nodeData = {
+                    id, label: id,
+                    color: { background: 'rgba(239,68,68,0.3)', border: '#ef4444', highlight: { background: 'rgba(239,68,68,0.3)', border: '#ef4444' } },
+                    opacity: 0.4,
+                    font: { color: '#f87171', size: 16, strokeWidth: 1, strokeColor: '#000' }
+                };
+                if (currentNodeIds.has(id)) sbsVisNodes.update(nodeData);
+                else sbsVisNodes.add(nodeData);
+                currentNodeIds.delete(id);
+                // Remove after delay
+                setTimeout(() => { try { sbsVisNodes.remove(id); } catch(e) {} }, 800);
+            }
+        }
+    }
+
+    // Remove nodes that shouldn't exist
+    for (const id of currentNodeIds) {
+        sbsVisNodes.remove(id);
+    }
+
+    // Add/update desired edges
+    for (const [ek, edge] of desiredEdges) {
+        let edgeColor = '#555', width = 1.5;
+        let dashes = false;
+        
+        if (targetEdges.has(ek)) {
+            edgeColor = step.action === 'added' ? '#10b981' : (step.action === 'removed' ? '#ef4444' : '#f59e0b');
+            width = 4;
+            if (step.action === 'removed') dashes = true;
+        } else if (addedEdges.has(ek)) { 
+            edgeColor = '#10b981'; width = 2; 
+        }
+
+        const edgeData = {
+            id: ek, from: edge.from, to: edge.to, arrows: 'to',
+            color: { color: edgeColor, highlight: '#fff' }, width, dashes,
+            shadow: targetEdges.has(ek) ? { enabled: true, color: edgeColor, size: 8, x: 0, y: 0 } : false,
+            font: { color: '#666', size: 10, strokeWidth: 2, strokeColor: '#000' }
+        };
+
+        if (currentEdgeIds.has(ek)) sbsVisEdges.update(edgeData);
+        else sbsVisEdges.add(edgeData);
+        currentEdgeIds.delete(ek);
+    }
+
+    // Ghost removed edges
+    if (step.action === 'removed') {
+        for (const [ek, edge] of ghostEdges) {
+            if (!desiredEdges.has(ek)) {
+                const edgeData = {
+                    id: ek, from: edge.from, to: edge.to, arrows: 'to',
+                    color: { color: '#ef4444', highlight: '#ef4444' }, width: 2, dashes: true,
+                };
+                if (currentEdgeIds.has(ek)) sbsVisEdges.update(edgeData);
+                else sbsVisEdges.add(edgeData);
+                currentEdgeIds.delete(ek);
+                setTimeout(() => { try { sbsVisEdges.remove(ek); } catch(e) {} }, 800);
+            }
+        }
+    }
+
+    // Remove remaining stale edges
+    for (const id of currentEdgeIds) {
+        sbsVisEdges.remove(id);
+    }
+}
+
+// --- SBS Carousel ---
+
+function initSbsCarousel() {
+    const actionClasses = {
+        'info': 'sbs-action-info', 'added': 'sbs-action-added',
+        'removed': 'sbs-action-removed', 'complete': 'sbs-action-complete'
+    };
+    const actionLabels = {
+        'info': 'INFO', 'added': 'ADDED', 'removed': 'REMOVED', 'complete': 'DONE'
+    };
+
+    const cards = sbsSteps.map((step, idx) => {
+        return `<div class="sbs-step ${actionClasses[step.action] || ''}" id="sbs-step-card-${idx}" style="--step-color: ${step.color};">
+            <div class="sbs-step-badge" style="background: ${step.color}22; color: ${step.color};">${actionLabels[step.action] || step.action.toUpperCase()}</div>
+            <div class="sbs-step-rule">${step.rule.includes('\n') ? step.rule.split('\n').map(l => `<div>${l}</div>`).join('') : step.rule}</div>
+            ${step.reasoning ? `<div class="sbs-step-reasoning">${step.reasoning}</div>` : ''}
+            <div class="sbs-step-stage">${step.stage}</div>
+        </div>`;
+    }).join('');
+    SBS.carousel.innerHTML = cards;
+}
+
+function updateSbsCarousel() {
+    // Update classes efficiently instead of rebuilding the DOM
+    const children = SBS.carousel.children;
+    for (let i = 0; i < children.length; i++) {
+        const card = children[i];
+        card.classList.remove('past', 'current', 'future');
+        if (i < sbsCurrentStep) card.classList.add('past');
+        else if (i === sbsCurrentStep) card.classList.add('current');
+        else card.classList.add('future');
+    }
+
+    // Scroll current step into view
+    requestAnimationFrame(() => {
+        const currentCard = SBS.carousel.querySelector('.sbs-step.current');
+        if (currentCard) {
+            currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+}
+
+function updateSbsControls() {
+    SBS.btnPrev.disabled = sbsCurrentStep === 0;
+    SBS.btnNext.disabled = sbsCurrentStep === sbsSteps.length - 1;
+    const step = sbsSteps[sbsCurrentStep];
+    SBS.stageLabel.textContent = step.stage;
+    SBS.stageLabel.style.color = step.color;
+    SBS.counter.textContent = `${sbsCurrentStep + 1} / ${sbsSteps.length}`;
+    SBS.progressFill.style.width = `${((sbsCurrentStep) / (sbsSteps.length - 1)) * 100}%`;
+    SBS.progressFill.style.background = step.color;
+
+    // Render current grammar state
+    const grammarLines = [];
+    const grammar = step.grammarAfter;
+    for (const lhs in grammar) {
+        let lineHTML = `<span style="color:#3b82f6;font-weight:600;">${lhs}</span> &rarr; `;
+        const rhsItems = grammar[lhs].map(rhs => {
+            const displayRhs = rhs || '&epsilon;';
+            if (lhs === step.targetLhs && rhs === step.targetRhs) {
+                if (step.action === 'added') return `<span style="color:#10b981;font-weight:700;text-shadow: 0 0 8px rgba(16,185,129,0.5);">${displayRhs}</span>`;
+                if (step.action === 'removed') return `<span style="color:#ef4444;font-weight:700;text-decoration:line-through;opacity:0.6;">${displayRhs}</span>`;
+            }
+            return displayRhs;
+        });
+        
+        // Include removed ghost rhs if needed
+        if (step.action === 'removed' && lhs === step.targetLhs && !grammar[lhs].includes(step.targetRhs)) {
+            rhsItems.push(`<span style="color:#ef4444;font-weight:700;text-decoration:line-through;opacity:0.6;">${step.targetRhs || '&epsilon;'}</span>`);
+        }
+
+        if (rhsItems.length > 0) {
+            lineHTML += rhsItems.join(' <span style="color:#666;">|</span> ');
+            grammarLines.push(`<div>${lineHTML}</div>`);
+        }
+    }
+    
+    // Ghost removed lhs entirely
+    if (step.action === 'removed' && step.targetLhs && !grammar[step.targetLhs]) {
+        grammarLines.push(`<div style="color:#ef4444;font-weight:700;text-decoration:line-through;opacity:0.6;"><span style="color:#ef4444;">${step.targetLhs}</span> &rarr; ${step.targetRhs || '&epsilon;'}</div>`);
+    }
+
+    SBS.grammarContent.innerHTML = grammarLines.join('') || '<div style="color:#666;font-style:italic;">Empty Grammar</div>';
+}
+
+function goToSbsStep(idx) {
+    if (idx < 0 || idx >= sbsSteps.length) return;
+    sbsCurrentStep = idx;
+    updateSbsGraph(sbsSteps[sbsCurrentStep]);
+    updateSbsCarousel();
+    updateSbsControls();
+}
+
+function enterStepByStep() {
+    const initG = parseGrammar(DOM.cfgInput.value);
+    if (!initG['S']) { alert("Error: Start symbol 'S' is missing!"); return; }
+
+    runFullPipeline();
+    sbsSteps = flattenPipelineSteps();
+    sbsCurrentStep = 0;
+
+    // Show SBS view, hide main content
+    document.querySelector('.container').classList.add('hidden');
+    SBS.view.classList.remove('hidden');
+
+    // Init graph & carousel DOM exactly once
+    initSbsNetwork();
+    initSbsCarousel();
+    goToSbsStep(0);
+}
+
+function exitStepByStep() {
+    if (sbsAutoInterval) { clearInterval(sbsAutoInterval); sbsAutoInterval = null; }
+    if (sbsNetworkInstance) { sbsNetworkInstance.destroy(); sbsNetworkInstance = null; }
+    SBS.view.classList.add('hidden');
+    document.querySelector('.container').classList.remove('hidden');
+    SBS.btnAuto.textContent = 'Auto';
+    SBS.btnAuto.style.background = '#6366f1';
+}
+
+// SBS Event Listeners
+SBS.btnEnter.addEventListener('click', enterStepByStep);
+SBS.btnExit.addEventListener('click', exitStepByStep);
+SBS.btnPrev.addEventListener('click', () => goToSbsStep(sbsCurrentStep - 1));
+SBS.btnNext.addEventListener('click', () => goToSbsStep(sbsCurrentStep + 1));
+SBS.btnAuto.addEventListener('click', () => {
+    if (sbsAutoInterval) {
+        clearInterval(sbsAutoInterval);
+        sbsAutoInterval = null;
+        SBS.btnAuto.textContent = 'Auto';
+        SBS.btnAuto.style.background = '#6366f1';
+    } else {
+        if (sbsCurrentStep === sbsSteps.length - 1) sbsCurrentStep = 0;
+        SBS.btnAuto.textContent = 'Pause';
+        SBS.btnAuto.style.background = '#ef4444';
+        sbsAutoInterval = setInterval(() => {
+            if (sbsCurrentStep < sbsSteps.length - 1) {
+                goToSbsStep(sbsCurrentStep + 1);
+            } else {
+                clearInterval(sbsAutoInterval);
+                sbsAutoInterval = null;
+                SBS.btnAuto.textContent = 'Auto';
+                SBS.btnAuto.style.background = '#6366f1';
+            }
+        }, 2000);
+    }
+});
+
+// Keyboard navigation for SBS mode
+document.addEventListener('keydown', (e) => {
+    if (SBS.view.classList.contains('hidden')) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goToSbsStep(sbsCurrentStep + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goToSbsStep(sbsCurrentStep - 1); }
+    if (e.key === 'Escape') exitStepByStep();
 });
 
 // --- PDF Report ---
