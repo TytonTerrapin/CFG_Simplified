@@ -18,6 +18,9 @@
 - **Animated Grammar Morphing**: Step through or auto-play the full transformation with CSS-animated token diffing — removed tokens shrink out, added tokens grow in.
 - **Automated Validation**: Features a proactive convergence engine that mathematically verifies the stability of the final output via a second-pass re-execution.
 - **Professional PDF Reporting**: Generates comprehensive, multi-page PDF reports with a branded cover page, per-stage transformation logs, 2x upscaled graph captures, side-by-side grammar comparisons, and reduction summary tables.
+- **Interactive Step-by-Step Walkthrough**: A cinematic, focused mode that allows users to traverse every single production-level change in the grammar.
+- **Granular Algorithmic Reasoning**: Every transformation (addition or removal) is accompanied by a mathematical explanation, providing deep theoretical context for each operation.
+- **Visual State Morphing**: Interactive graph transitions and grammar diffing provide a clear mental model of how symbols and rules are pruned or expanded.
 
 ## The Simplification Pipeline
 
@@ -34,6 +37,15 @@ Deletes symbols that cannot contribute to terminal strings or are unreachable fr
 
 ### 4. Convergence Validation
 A definitive safety check that re-processes the final result through the entire pipeline to verify absolute structural stability.
+
+## Interactive Walkthrough Mode
+
+The **Walkthrough Mode** (accessible via the violet button on the home page) provides a high-fidelity exploration of the simplification process:
+
+- **Carousel Navigation**: Scroll through a focused timeline of individual rule changes.
+- **Live Grammar Sync**: See the grammar state "morph" in real-time as you move between steps.
+- **Graph Morphing**: The dependency graph dynamically updates with color-coded nodes and edges to highlight the specific impact of the current step.
+- **Automated Replay**: Use the **Auto** button to play back the entire simplification process like a movie, ideal for educational demonstrations.
 
 ## Architecture
 

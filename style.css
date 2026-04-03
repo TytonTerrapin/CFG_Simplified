@@ -10,6 +10,8 @@
     --success: #10b981;
     --danger: #ef4444;
     --warning: #f59e0b;
+    --feature-accent: #10b981; /* Emerald */
+    --feature-accent-hover: #34d399;
 }
 
 * {
@@ -533,6 +535,29 @@ select.builder-input {
     border-color: #444;
 }
 
+.btn-feature {
+    background: transparent;
+    color: var(--feature-accent);
+    border-color: var(--feature-accent);
+}
+
+.btn-feature:hover {
+    background: var(--feature-accent);
+    color: #000; /* Contrast with green */
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-feature-solid {
+    background: var(--feature-accent);
+    color: #000;
+    border-color: var(--feature-accent);
+}
+
+.btn-feature-solid:hover {
+    background: var(--feature-accent-hover);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
 .panel-actions {
     margin-top: 2rem;
     display: flex;
@@ -1019,7 +1044,7 @@ select.builder-input {
 }
 
 .reasoning-step.method-transitive {
-    border-left-color: #3b82f6;
+    border-left-color: #14b8a6;
 }
 
 .reasoning-dot {
@@ -1038,8 +1063,8 @@ select.builder-input {
 }
 
 .reasoning-step.method-transitive .reasoning-dot {
-    background: #3b82f6;
-    box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+    background: #14b8a6;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
 }
 
 .reasoning-body {
@@ -1529,7 +1554,7 @@ select.builder-input {
 
 .stage-sets-box {
     background: #111;
-    border-left: 3px solid #3b82f6;
+    border-left: 3px solid #14b8a6;
     padding: 15px;
     margin-bottom: 20px;
     border-radius: 0 4px 4px 0;
@@ -1843,6 +1868,7 @@ html {
     background: #fff;
     width: 0%;
     transition: width 0.3s ease, background 0.3s ease;
+    box-shadow: 0 0 10px var(--step-color, #fff);
 }
 
 .sbs-main {
@@ -1927,11 +1953,12 @@ html {
     background: #0f0f0f;
     border: 1px solid #222;
     border-left: 4px solid var(--step-color, #666);
-    transition: all 0.4s ease;
-    opacity: 0.15;
-    transform: scale(0.9);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.1;
+    transform: scale(0.85) translateX(20px);
     position: relative;
     overflow: hidden;
+    filter: blur(2px);
 }
 
 .sbs-step::before {
@@ -1944,22 +1971,24 @@ html {
 }
 
 .sbs-step.past {
-    opacity: 0.3;
-    transform: scale(0.9);
+    opacity: 0.25;
+    transform: scale(0.9) translateX(10px);
+    filter: blur(1px);
 }
 
 .sbs-step.future {
-    opacity: 0.2;
-    transform: scale(0.9);
+    opacity: 0.15;
+    transform: scale(0.85) translateX(20px);
 }
 
 .sbs-step.current {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateX(0);
     background: #111;
-    border-color: #333;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    border-color: #444;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 20px rgba(var(--step-color-rgb, 255, 255, 255), 0.1);
     z-index: 10;
+    filter: blur(0);
 }
 
 .sbs-step-badge {

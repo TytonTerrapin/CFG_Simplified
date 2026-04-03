@@ -101,7 +101,7 @@
                         <p>
                             Removes "alias" transitions like <span class="concept-badge">A → B</span>.
                         </p>
-                        <div class="formal-math" style="border-left-color: #3b82f6;">
+                        <div class="formal-math" style="border-left-color: #8b5cf6;">
                             <span class="math-label">Derivation Closure</span>
                             <span class="math-set">Closure(<span class="math-var">A</span>)</span> = { <span
                                 class="math-var">B</span> <span class="math-operator">|</span> <span
@@ -252,7 +252,7 @@ D -> d"></textarea>
 
                 <div class="panel-actions center-actions" style="border-top: none; padding-top: 0; gap: 1rem;">
                     <button class="btn btn-primary btn-large" id="btn-start">Execute Simplification Pipeline</button>
-                    <button class="btn btn-secondary btn-large" id="btn-step-by-step" style="border-color:#6366f1;color:#6366f1;">Step-by-Step Walkthrough</button>
+                    <button class="btn btn-primary btn-large" id="btn-step-by-step">Step-by-Step Walkthrough</button>
                 </div>
             </section>
 
@@ -294,17 +294,17 @@ D -> d"></textarea>
                                 <h3>Dependency Graph</h3>
                                 <div class="graph-legend">
                                     <div class="legend-item"><span class="legend-dot"
-                                            style="background:#3b82f6;"></span>Start Symbol</div>
+                                            style="background:#10b981;"></span>Start Symbol</div>
                                     <div class="legend-item"><span class="legend-dot"
-                                            style="background:#fbbf24;"></span>Nullable</div>
-                                    <div class="legend-item"><span class="legend-dot"
-                                            style="background:#34d399;"></span>Generating</div>
+                                             style="background:#fbbf24;"></span>Nullable</div>
+                                     <div class="legend-item"><span class="legend-dot"
+                                             style="background:#10b981;"></span>Generated</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#f87171;"></span>Removed</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#94a3b8;"></span>Unreachable</div>
                                     <div class="legend-item"><span class="legend-line"
-                                            style="background:#3b82f6;"></span>Unit Rule</div>
+                                            style="background:#8b5cf6;"></span>Unit Rule</div>
                                     <div class="legend-item"><span class="legend-line"
                                             style="background:#34d399; height:3px;"></span>Added</div>
                                 </div>
@@ -355,19 +355,19 @@ D -> d"></textarea>
                                 <h3>Dependency Graph</h3>
                                 <div class="graph-legend">
                                     <div class="legend-item"><span class="legend-dot"
-                                            style="background:#3b82f6;"></span>Start Symbol</div>
+                                            style="background:#10b981;"></span>Start Symbol</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#fbbf24;"></span>Nullable</div>
                                     <div class="legend-item"><span class="legend-dot"
-                                            style="background:#34d399;"></span>Generating</div>
+                                            style="background:#10b981;"></span>Generating</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#f87171;"></span>Removed</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#94a3b8;"></span>Unreachable</div>
                                     <div class="legend-item"><span class="legend-line"
-                                            style="background:#3b82f6;"></span>Unit Rule</div>
+                                            style="background:#8b5cf6;"></span>Unit Rule</div>
                                     <div class="legend-item"><span class="legend-line"
-                                            style="background:#34d399; height:3px;"></span>Added</div>
+                                            style="background:#10b981; height:3px;"></span>Added</div>
                                 </div>
                                 <div id="unit-network" class="network-canvas"></div>
                                 <button class="btn-reset-graph" data-network="unit-network">Reset View</button>
@@ -417,19 +417,19 @@ D -> d"></textarea>
                                 <h3>Dependency Graph</h3>
                                 <div class="graph-legend">
                                     <div class="legend-item"><span class="legend-dot"
-                                            style="background:#3b82f6;"></span>Start Symbol</div>
+                                            style="background:#10b981;"></span>Start Symbol</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#fbbf24;"></span>Nullable</div>
                                     <div class="legend-item"><span class="legend-dot"
-                                            style="background:#34d399;"></span>Generating</div>
+                                            style="background:#10b981;"></span>Generating</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#f87171;"></span>Removed</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#94a3b8;"></span>Unreachable</div>
                                     <div class="legend-item"><span class="legend-line"
-                                            style="background:#3b82f6;"></span>Unit Rule</div>
+                                            style="background:#8b5cf6;"></span>Unit Rule</div>
                                     <div class="legend-item"><span class="legend-line"
-                                            style="background:#34d399; height:3px;"></span>Added</div>
+                                            style="background:#10b981; height:3px;"></span>Added</div>
                                 </div>
                                 <div id="useless-network" class="network-canvas"></div>
                                 <button class="btn-reset-graph" data-network="useless-network">Reset View</button>
@@ -501,7 +501,7 @@ minimal and stable. A status banner will appear below to confirm.
                                         0: Original Grammar</h3>
                                 </div>
                                 <button id="btn-auto-play" class="btn btn-primary"
-                                    style="width: 140px; background: #6366f1; border-color: #4f46e5;">▶
+                                    style="width: 140px;">▶
                                     Auto-Play</button>
                                 <button id="btn-next-graph" class="btn btn-secondary">Next ▶</button>
                             </div>
@@ -560,7 +560,7 @@ minimal and stable. A status banner will appear below to confirm.
                     </div>
                 </div>
                 <button id="btn-sbs-next" class="btn btn-secondary">Next</button>
-                <button id="btn-sbs-auto" class="btn btn-primary" style="background:#6366f1;border-color:#4f46e5;min-width:100px;">Auto</button>
+                <button id="btn-sbs-auto" class="btn btn-primary" style="min-width:100px;">Auto</button>
                 <button id="btn-sbs-exit" class="btn btn-secondary" style="border-color:var(--danger);color:var(--danger);">Exit</button>
             </div>
 

@@ -86,6 +86,13 @@ const EXAMPLES = {
     complex2: "S -> XYZ | UVW\nX -> Y | a\nY -> Z | b\nZ -> X | c | ?"
 };
 
+// --- Helpers & Global State ---
+const isVar = (s) => s && s.length === 1 && s >= 'A' && s <= 'Z';
+const hexToRgb = (hex) => {
+    const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    return `${r}, ${g}, ${b}`;
+};
+
 let pipelineHistory = [];
 let networkInstances = {};
 let currentPlaybackStage = 0;
@@ -309,7 +316,7 @@ function buildHtmlLogs(logs) {
             // Show final closures
             if (log.closure) {
                 for (const k in log.closure) {
-                    details += `<div class="rule-item" style="color:#93c5fd;">D(${k}) = { ${log.closure[k].join(', ')} }</div>`;
+                    details += `<div class="rule-item" style="color:#5eead4;">D(${k}) = { ${log.closure[k].join(', ')} }</div>`;
                 }
             }
             // Show closure reasoning iterations
@@ -341,10 +348,10 @@ function buildHtmlLogs(logs) {
 
         // ============ UNIT REPLACEMENT ============
         } else if (log.type === "unit_replacement") {
-            const cLine = `<div class="concept-line" style="border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.04); color: #93c5fd;">Unit productions (A → B) introduce unnecessary indirection. We compute the full derivation closure for each variable and substitute them with direct productions.</div>`;
+            const cLine = `<div class="concept-line" style="border-left-color: #14b8a6; background: rgba(139, 92, 246, 0.04); color: #5eead4;">Unit productions (A → B) introduce unnecessary indirection. We compute the full derivation closure for each variable and substitute them with direct productions.</div>`;
             details = cLine + `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
                 return `
-                <div class="rule-transform-container" style="margin-bottom: 15px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <div class="rule-transform-container" style="margin-bottom: 15px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #14b8a6;">
                     <div style="font-weight: 600; color: #fff; margin-bottom: 8px;">Variable: ${rt.non_terminal}</div>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
                         ${rt.removed_units.map(ru => `
@@ -485,8 +492,6 @@ function renderSets(sets, stageIdx, containerId) {
 function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {}, stageIdx = 0) {
     if (!window.vis || !container) return;
     container.innerHTML = '';
-    
-    const isVar = (s) => s && s.length === 1 && s >= 'A' && s <= 'Z';
 
     const getAnalysis = (g) => {
         const nodes = new Set();
@@ -531,7 +536,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
             if (sets.reachable && !sets.reachable.includes(id)) { color = '#94a3b8'; borderColor = '#475569'; } // Unreachable
         }
 
-        if (id === 'S') color = '#3b82f6';
+        if (id === 'S') color = '#10b981'; // Green for Start
         if (id === '?') color = '#6b7280';
 
         if (status === 'added') { color = 'rgba(16,185,129, 0.4)'; borderColor = '#34d399'; opacity = 0.9; }
@@ -571,7 +576,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
         let edgeColor = '#666', width = 1.5, dashes = false;
         if (e.status === 'added') { edgeColor = '#34d399'; width = 2.5; }
         if (e.status === 'removed') { edgeColor = '#ef4444'; width = 1.5; dashes = true; }
-        if (e.isUnit && e.status !== 'removed') { edgeColor = '#3b82f6'; width = 2.5; } // Blue unit edges
+        if (e.isUnit && e.status !== 'removed') { edgeColor = '#14b8a6'; width = 2.5; } // Violet unit edges
 
         visEdges.add({
             id: key, from: e.from, to: e.to, arrows: 'to',
@@ -579,7 +584,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
             width: width,
             dashes: dashes,
             label: e.isUnit && e.status === 'kept' ? 'unit' : '',
-            font: { color: '#3b82f6', size: 10, strokeWidth: 2, strokeColor: '#000' }
+            font: { color: '#14b8a6', size: 10, strokeWidth: 2, strokeColor: '#000' }
         });
     });
 
@@ -595,7 +600,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
             const edgeUpdates = [];
             visEdges.forEach(edge => {
                 if (reachable.includes(edge.from) && reachable.includes(edge.to) && edge.font) {
-                    edgeUpdates.push({ id: edge.id, width: 5, color: '#3b82f6' });
+                    edgeUpdates.push({ id: edge.id, width: 5, color: '#14b8a6' });
                 }
             });
             visEdges.update(edgeUpdates);
@@ -603,7 +608,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
         network.on("blurNode", () => {
             const edgeResets = [];
             visEdges.forEach(edge => {
-                if (edge.font) edgeResets.push({ id: edge.id, width: 2.5, color: '#3b82f6' });
+                if (edge.font) edgeResets.push({ id: edge.id, width: 2.5, color: '#14b8a6' });
             });
             visEdges.update(edgeResets);
         });
@@ -777,12 +782,12 @@ DOM.btnAutoPlay.addEventListener('click', () => {
         clearInterval(autoPlayInterval);
         autoPlayInterval = null;
         DOM.btnAutoPlay.innerText = '▶ Auto-Play';
-        DOM.btnAutoPlay.style.background = '#6366f1';
+        DOM.btnAutoPlay.style.background = 'var(--feature-accent)';
     } else {
         if (currentPlaybackStage === STAGE_LABELS.length - 1) currentPlaybackStage = 0;
         updateDynamicPlayback();
         DOM.btnAutoPlay.innerText = '⏸ Pause';
-        DOM.btnAutoPlay.style.background = '#ef4444';
+        DOM.btnAutoPlay.style.background = 'var(--danger)';
         
         autoPlayInterval = setInterval(() => {
             if (currentPlaybackStage < STAGE_LABELS.length - 1) {
@@ -792,7 +797,7 @@ DOM.btnAutoPlay.addEventListener('click', () => {
                 clearInterval(autoPlayInterval);
                 autoPlayInterval = null;
                 DOM.btnAutoPlay.innerText = '▶ Auto-Play';
-                DOM.btnAutoPlay.style.background = '#6366f1';
+                DOM.btnAutoPlay.style.background = 'var(--feature-accent)';
             }
         }, 3000);
     }
@@ -825,12 +830,13 @@ let sbsNetworkInstance = null;
 function flattenPipelineSteps() {
     const steps = [];
     let runningGrammar = deepCopy(pipelineHistory[0].grammar);
-    const STAGE_COLORS = { 1: '#10b981', 2: '#3b82f6', 3: '#ef4444' };
-    const STAGE_NAMES = { 1: 'Null Productions', 2: 'Unit Productions', 3: 'Useless Symbols' };
+    const STAGE_COLORS = { 1: '#10b981', 2: '#14b8a6', 3: '#f59e0b', 4: '#f43f5e' };
+    const STAGE_NAMES = { 1: 'Null Productions', 2: 'Unit Productions', 3: 'Useless Symbols', 4: 'Validation Pass' };
     const STAGE_DESCS = {
         1: 'Nullable variables are identified and alternative productions are generated. Then all \u03b5-productions are removed.',
         2: 'Unit productions (A \u2192 B) are replaced with non-unit productions reachable through the derivation closure.',
-        3: 'Non-productive and unreachable symbols are identified and removed from the grammar.'
+        3: 'Non-productive and unreachable symbols are identified and removed from the grammar.',
+        4: 'The grammar undergoes a validation sweep to ensure mathematical convergence and minimality.'
     };
 
     steps.push({
@@ -910,10 +916,10 @@ function flattenPipelineSteps() {
     }
 
     steps.push({
-        stage: 'Complete', stageIdx: 4, color: '#10b981', action: 'complete',
+        stage: 'Complete', stageIdx: 4, color: '#f43f5e', action: 'complete',
         title: 'Simplification Complete',
         rule: Object.keys(runningGrammar).map(k => `${k} \u2192 ${runningGrammar[k].map(r => r || '\u03b5').join(' | ')}`).join('\n'),
-        reasoning: 'All null productions, unit productions, and useless symbols have been eliminated. The grammar is fully simplified.',
+        reasoning: 'All null productions, unit productions, and useless symbols have been eliminated. The grammar is fully simplified and has passed the convergence validation pass.',
         grammarBefore: deepCopy(runningGrammar), grammarAfter: deepCopy(runningGrammar),
     });
 
@@ -978,7 +984,6 @@ function initSbsNetwork() {
 function updateSbsGraph(step) {
     const grammar = step.grammarAfter;
     const prevGrammar = step.grammarBefore;
-    const isVar = (s) => s && s.length === 1 && s >= 'A' && s <= 'Z';
 
     // Build desired nodes/edges from afterGrammar
     const desiredNodes = new Map();
@@ -1075,7 +1080,7 @@ function updateSbsGraph(step) {
             color = step.action === 'added' ? '#10b981' : (step.action === 'removed' ? '#ef4444' : '#f59e0b');
             border = '#fff';
         } else if (id === 'S') { 
-            color = '#3b82f6'; border = '#2563eb'; 
+            color = '#10b981'; border = '#059669'; 
         } else if (!nodeInfo.isVar && id !== '\u03b5') { 
             color = '#6b7280'; border = '#374151'; 
         } else if (id === '\u03b5') { 
@@ -1180,7 +1185,9 @@ function initSbsCarousel() {
     };
 
     const cards = sbsSteps.map((step, idx) => {
-        return `<div class="sbs-step ${actionClasses[step.action] || ''}" id="sbs-step-card-${idx}" style="--step-color: ${step.color};">
+        const colorRgb = hexToRgb(step.color || '#ffffff');
+        
+        return `<div class="sbs-step ${actionClasses[step.action] || ''}" id="sbs-step-card-${idx}" style="--step-color: ${step.color}; --step-color-rgb: ${colorRgb};">
             <div class="sbs-step-badge" style="background: ${step.color}22; color: ${step.color};">${actionLabels[step.action] || step.action.toUpperCase()}</div>
             <div class="sbs-step-rule">${step.rule.includes('\n') ? step.rule.split('\n').map(l => `<div>${l}</div>`).join('') : step.rule}</div>
             ${step.reasoning ? `<div class="sbs-step-reasoning">${step.reasoning}</div>` : ''}
@@ -1224,7 +1231,7 @@ function updateSbsControls() {
     const grammarLines = [];
     const grammar = step.grammarAfter;
     for (const lhs in grammar) {
-        let lineHTML = `<span style="color:#3b82f6;font-weight:600;">${lhs}</span> &rarr; `;
+        let lineHTML = `<span style="color:${lhs === 'S' ? '#10b981' : '#14b8a6'};font-weight:600;">${lhs}</span> &rarr; `;
         const rhsItems = grammar[lhs].map(rhs => {
             const displayRhs = rhs || '&epsilon;';
             if (lhs === step.targetLhs && rhs === step.targetRhs) {
@@ -1285,7 +1292,7 @@ function exitStepByStep() {
     SBS.view.classList.add('hidden');
     document.querySelector('.container').classList.remove('hidden');
     SBS.btnAuto.textContent = 'Auto';
-    SBS.btnAuto.style.background = '#6366f1';
+    SBS.btnAuto.style.background = 'var(--feature-accent)';
 }
 
 // SBS Event Listeners
@@ -1298,11 +1305,11 @@ SBS.btnAuto.addEventListener('click', () => {
         clearInterval(sbsAutoInterval);
         sbsAutoInterval = null;
         SBS.btnAuto.textContent = 'Auto';
-        SBS.btnAuto.style.background = '#6366f1';
+        SBS.btnAuto.style.background = '#10b981';
     } else {
         if (sbsCurrentStep === sbsSteps.length - 1) sbsCurrentStep = 0;
         SBS.btnAuto.textContent = 'Pause';
-        SBS.btnAuto.style.background = '#ef4444';
+        SBS.btnAuto.style.background = 'var(--danger)';
         sbsAutoInterval = setInterval(() => {
             if (sbsCurrentStep < sbsSteps.length - 1) {
                 goToSbsStep(sbsCurrentStep + 1);
@@ -1310,7 +1317,7 @@ SBS.btnAuto.addEventListener('click', () => {
                 clearInterval(sbsAutoInterval);
                 sbsAutoInterval = null;
                 SBS.btnAuto.textContent = 'Auto';
-                SBS.btnAuto.style.background = '#6366f1';
+                SBS.btnAuto.style.background = 'var(--feature-accent)';
             }
         }, 2000);
     }
