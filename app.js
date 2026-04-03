@@ -144,25 +144,25 @@ function renderGrammarStandardFormat(grammar) {
 
 function renderGrammarDiff(beforeGrammar, afterGrammar, context) {
     let ht = '';
-    
+
     if (context === 'animated') {
         const keys = [...new Set([...Object.keys(beforeGrammar), ...Object.keys(afterGrammar)])].sort();
         if (keys.length === 0) return '<p style="padding:10px;text-align:center;color:gray;">Empty grammar</p>';
         for (const lhs of keys) {
             const beforeRhs = new Set((beforeGrammar[lhs] || []).map(r => r === '' ? '?' : r));
             const afterRhs = new Set((afterGrammar[lhs] || []).map(r => r === '' ? '?' : r));
-            
+
             const unionRhs = [...new Set([...beforeRhs, ...afterRhs])];
             if (unionRhs.length === 0) continue;
-            
+
             let tokensHtml = '';
             unionRhs.forEach((r, idx) => {
                 const isRemoved = beforeRhs.has(r) && !afterRhs.has(r);
                 const isAdded = !beforeRhs.has(r) && afterRhs.has(r);
                 const isLast = idx === unionRhs.length - 1;
-                
+
                 const pipeHtml = isLast ? '' : `<span class="pipe">|</span>`;
-                
+
                 if (isRemoved) {
                     tokensHtml += `<span class="token-anim-removed-container"><span class="token-anim-removed">${r}</span>${pipeHtml}</span>`;
                 } else if (isAdded) {
@@ -171,7 +171,7 @@ function renderGrammarDiff(beforeGrammar, afterGrammar, context) {
                     tokensHtml += `<span class="token-kept-container"><span class="token-kept">${r}</span>${pipeHtml}</span>`;
                 }
             });
-            
+
             ht += `<div class="grammar-rule">
                 <span class="rule-lhs">${lhs}</span>
                 <span class="rule-arrow">→</span>
@@ -245,7 +245,7 @@ function buildHtmlLogs(logs) {
                 details += `</div>`;
             }
 
-        // ============ PRODUCTION GENERATION ============
+            // ============ PRODUCTION GENERATION ============
         } else if (log.type === "production_generation") {
             const cLine = `<div class="concept-line">Because { ${nullableSet.join(', ') || 'Ø'} } are nullable, for each production with k nullable positions we generate 2<sup>k</sup> − 1 new alternatives.</div>`;
             details = cLine + `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
@@ -271,7 +271,7 @@ function buildHtmlLogs(logs) {
                 </div>`;
             }).join('') + `</div>`;
 
-        // ============ NULL REMOVAL ============
+            // ============ NULL REMOVAL ============
         } else if (log.type === "null_removal") {
             if (log.removed_epsilon_rules && log.removed_epsilon_rules.length > 0) {
                 details = `<div class="rule-list">`;
@@ -284,7 +284,7 @@ function buildHtmlLogs(logs) {
                 details += `</div>`;
             }
 
-        // ============ UNIT IDENTIFICATION ============
+            // ============ UNIT IDENTIFICATION ============
         } else if (log.type === "unit_identification") {
             const unitReasons = log.identification_reasoning?.filter(r => r.is_unit !== false) || [];
             const nonUnitReasons = log.identification_reasoning?.filter(r => r.is_unit === false) || [];
@@ -310,7 +310,7 @@ function buildHtmlLogs(logs) {
             }
             details += `</div>`;
 
-        // ============ CLOSURE CALCULATION ============
+            // ============ CLOSURE CALCULATION ============
         } else if (log.type === "closure_calculation") {
             details = `<div class="rule-list">`;
             // Show final closures
@@ -346,7 +346,7 @@ function buildHtmlLogs(logs) {
             }
             details += `</div>`;
 
-        // ============ UNIT REPLACEMENT ============
+            // ============ UNIT REPLACEMENT ============
         } else if (log.type === "unit_replacement") {
             const cLine = `<div class="concept-line" style="border-left-color: #14b8a6; background: rgba(139, 92, 246, 0.04); color: #5eead4;">Unit productions (A → B) introduce unnecessary indirection. We compute the full derivation closure for each variable and substitute them with direct productions.</div>`;
             details = cLine + `<div class="rule-list" style="margin-top: 10px;">` + log.rule_transformations.map(rt => {
@@ -371,7 +371,7 @@ function buildHtmlLogs(logs) {
                 </div>`;
             }).join('') + `</div>`;
 
-        // ============ PHASE 1 (Productive) ============
+            // ============ PHASE 1 (Productive) ============
         } else if (log.type === "phase1") {
             details = `<div class="rule-list">`;
             // Show iteration trace
@@ -405,7 +405,7 @@ function buildHtmlLogs(logs) {
             });
             details += `</div>`;
 
-        // ============ PHASE 2 (Reachable) ============
+            // ============ PHASE 2 (Reachable) ============
         } else if (log.type === "phase2") {
             details = `<div class="rule-list">`;
             // Show BFS trace
@@ -447,7 +447,7 @@ function buildHtmlLogs(logs) {
             });
             details += `</div>`;
 
-        // ============ SUMMARY ============
+            // ============ SUMMARY ============
         } else if (log.type === "summary-clear") {
             details = `<div class="rule-list"><div class="rule-item addition" style="color: #34d399; font-weight: bold; padding: 10px; border-left: 3px solid #34d399; background: rgba(52, 211, 153, 0.1);">VALIDATION PASSED</div></div>`;
         } else if (log.type === "summary-warning") {
@@ -501,7 +501,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
             for (let rhs of g[lhs]) {
                 if (rhs === '') { nodes.add('?'); }
                 const isUnit = rhs.length === 1 && isVar(rhs);
-                prods.push({lhs, rhs, isUnit});
+                prods.push({ lhs, rhs, isUnit });
                 for (let i = 0; i < rhs.length; i++) {
                     const char = rhs[i];
                     if (char !== ' ' && char !== '|') {
@@ -511,7 +511,7 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
                 }
             }
         }
-        return {nodes, prods};
+        return { nodes, prods };
     };
 
     const bA = getAnalysis(beforeGrammar);
@@ -523,16 +523,16 @@ function renderGrammarDiffGraph(beforeGrammar, afterGrammar, container, sets = {
     allNodeIds.forEach(id => {
         const status = !bA.nodes.has(id) ? 'added' : (!aA.nodes.has(id) ? 'removed' : 'kept');
         const isTerm = !isVar(id) && id !== '?';
-        
+
         let color = '#4a5568', borderColor = '#111', opacity = 1;
-        
+
         // Node role highlighting
         if (stageIdx === 1 && sets.nullable?.includes(id)) { color = '#fbbf24'; borderColor = '#f59e0b'; } // Nullable
-        
+
         if (stageIdx === 3 || stageIdx === 4) {
             if (sets.generating && sets.generating.includes(id)) { color = '#34d399'; borderColor = '#059669'; } // Generating
             else if (sets.generating && !isTerm) { color = '#f87171'; borderColor = '#ef4444'; } // Non-generating
-            
+
             if (sets.reachable && !sets.reachable.includes(id)) { color = '#94a3b8'; borderColor = '#475569'; } // Unreachable
         }
 
@@ -639,33 +639,33 @@ function areGrammarsEqual(g1, g2) {
 function runFullPipeline() {
     const initG = parseGrammar(DOM.cfgInput.value);
     const s0 = { stageName: "Original", grammar: initG, metrics: _calculate_metrics(initG) };
-    
+
     // Correct algorithmic order
     const s1 = remove_null_productions(deepCopy(initG));
     const s2 = remove_unit_productions(deepCopy(s1.grammar));
     const s3 = remove_useless_symbols(deepCopy(s2.grammar), "Useless Symbols Removal");
-    
+
     // Validation pass
     let v_grammar = deepCopy(s3.grammar);
     v_grammar = remove_null_productions(v_grammar).grammar;
     v_grammar = remove_unit_productions(v_grammar).grammar;
     v_grammar = remove_useless_symbols(v_grammar).grammar;
-    
+
     const isStable = areGrammarsEqual(s3.grammar, v_grammar);
-    
+
     // Summary stage to maintain 4-stage UI
     const s4 = {
         ...s3,
         stageName: "Validation Check",
         step_logs: [{
             title: isStable ? "Validation Passed: Grammar is Stable" : "Validation Warning: Grammar is Unstable",
-            description: isStable ? 
-                "CLEAR: The rigorous mathematical validation has completed. Re-running the entire normalization pipeline on this output yielded no further reductions. The grammar is perfectly stable and minimized." : 
+            description: isStable ?
+                "CLEAR: The rigorous mathematical validation has completed. Re-running the entire normalization pipeline on this output yielded no further reductions. The grammar is perfectly stable and minimized." :
                 "WARNING: The grammar required further reductions on a second pass. This indicates cyclic anomalies or unhandled edge cases.",
             type: isStable ? "summary-clear" : "summary-warning"
         }]
     };
-    
+
     pipelineHistory = [s0, s1, s2, s3, s4];
 }
 
@@ -730,16 +730,16 @@ DOM.navItems.forEach(item => {
 // --- UI Listeners ---
 
 DOM.btnStart.addEventListener('click', processAllStepsAndRender);
-DOM.exampleSelect.addEventListener('change', () => { 
+DOM.exampleSelect.addEventListener('change', () => {
     if (DOM.exampleSelect.value) {
-        DOM.cfgInput.value = EXAMPLES[DOM.exampleSelect.value] || EXAMPLES.general; 
+        DOM.cfgInput.value = EXAMPLES[DOM.exampleSelect.value] || EXAMPLES.general;
     }
 });
-DOM.btnClear.addEventListener('click', () => { 
-    DOM.cfgInput.value = ''; 
+DOM.btnClear.addEventListener('click', () => {
+    DOM.cfgInput.value = '';
     DOM.exampleSelect.value = '';
-    DOM.pipelineResults.classList.add('hidden'); 
-    DOM.navigator.classList.remove('visible'); 
+    DOM.pipelineResults.classList.add('hidden');
+    DOM.navigator.classList.remove('visible');
 });
 
 DOM.btnAddRule.addEventListener('click', () => {
@@ -755,14 +755,14 @@ function updateDynamicPlayback() {
     if (!pipelineHistory.length) return;
     const cur = pipelineHistory[currentPlaybackStage], prev = currentPlaybackStage === 0 ? cur : pipelineHistory[currentPlaybackStage - 1];
     DOM.graphStageLabel.innerText = STAGE_LABELS[currentPlaybackStage];
-    
+
     // Graph update
     const sets = cur.stage_sets || cur.sets || {};
     renderGrammarDiffGraph(prev.grammar, cur.grammar, DOM.dynamicNetwork, sets, currentPlaybackStage);
-    
+
     // Stats update (Always compared to Stage 0 initial state for full scope)
     renderStats(pipelineHistory[0].metrics, cur.metrics, 'dynamic-stats');
-    
+
     // Grammar diff text update
     if (currentPlaybackStage === 0) {
         DOM.dynamicGrammar.innerHTML = renderGrammarStandardFormat(cur.grammar);
@@ -788,7 +788,7 @@ DOM.btnAutoPlay.addEventListener('click', () => {
         updateDynamicPlayback();
         DOM.btnAutoPlay.innerText = '⏸ Pause';
         DOM.btnAutoPlay.style.background = 'var(--danger)';
-        
+
         autoPlayInterval = setInterval(() => {
             if (currentPlaybackStage < STAGE_LABELS.length - 1) {
                 currentPlaybackStage++;
@@ -1049,13 +1049,13 @@ function updateSbsGraph(step) {
 
     const currentNodeIds = new Set(sbsVisNodes.getIds());
     const currentEdgeIds = new Set(sbsVisEdges.getIds());
-    
+
     // Check if target nodes/edges are part of the current step
     const targetLhs = step.targetLhs;
     const targetRhs = step.targetRhs;
     const targetNodes = new Set();
     const targetEdges = new Set();
-    
+
     if (targetLhs && targetRhs !== undefined) {
         targetNodes.add(targetLhs);
         if (targetRhs === '') {
@@ -1074,17 +1074,17 @@ function updateSbsGraph(step) {
     // Add/update desired nodes
     for (const [id, nodeInfo] of desiredNodes) {
         let color = '#4a5568', border = '#222';
-        
+
         // Highlight coloring
         if (targetNodes.has(id)) {
             color = step.action === 'added' ? '#10b981' : (step.action === 'removed' ? '#ef4444' : '#f59e0b');
             border = '#fff';
-        } else if (id === 'S') { 
-            color = '#10b981'; border = '#059669'; 
-        } else if (!nodeInfo.isVar && id !== '\u03b5') { 
-            color = '#6b7280'; border = '#374151'; 
-        } else if (id === '\u03b5') { 
-            color = '#6b7280'; border = '#374151'; 
+        } else if (id === 'S') {
+            color = '#10b981'; border = '#059669';
+        } else if (!nodeInfo.isVar && id !== '\u03b5') {
+            color = '#6b7280'; border = '#374151';
+        } else if (id === '\u03b5') {
+            color = '#6b7280'; border = '#374151';
         }
 
         const nodeData = {
@@ -1116,7 +1116,7 @@ function updateSbsGraph(step) {
                 else sbsVisNodes.add(nodeData);
                 currentNodeIds.delete(id);
                 // Remove after delay
-                setTimeout(() => { try { sbsVisNodes.remove(id); } catch(e) {} }, 800);
+                setTimeout(() => { try { sbsVisNodes.remove(id); } catch (e) { } }, 800);
             }
         }
     }
@@ -1130,13 +1130,13 @@ function updateSbsGraph(step) {
     for (const [ek, edge] of desiredEdges) {
         let edgeColor = '#555', width = 1.5;
         let dashes = false;
-        
+
         if (targetEdges.has(ek)) {
             edgeColor = step.action === 'added' ? '#10b981' : (step.action === 'removed' ? '#ef4444' : '#f59e0b');
             width = 4;
             if (step.action === 'removed') dashes = true;
-        } else if (addedEdges.has(ek)) { 
-            edgeColor = '#10b981'; width = 2; 
+        } else if (addedEdges.has(ek)) {
+            edgeColor = '#10b981'; width = 2;
         }
 
         const edgeData = {
@@ -1162,7 +1162,7 @@ function updateSbsGraph(step) {
                 if (currentEdgeIds.has(ek)) sbsVisEdges.update(edgeData);
                 else sbsVisEdges.add(edgeData);
                 currentEdgeIds.delete(ek);
-                setTimeout(() => { try { sbsVisEdges.remove(ek); } catch(e) {} }, 800);
+                setTimeout(() => { try { sbsVisEdges.remove(ek); } catch (e) { } }, 800);
             }
         }
     }
@@ -1186,7 +1186,7 @@ function initSbsCarousel() {
 
     const cards = sbsSteps.map((step, idx) => {
         const colorRgb = hexToRgb(step.color || '#ffffff');
-        
+
         return `<div class="sbs-step ${actionClasses[step.action] || ''}" id="sbs-step-card-${idx}" style="--step-color: ${step.color}; --step-color-rgb: ${colorRgb};">
             <div class="sbs-step-badge" style="background: ${step.color}22; color: ${step.color};">${actionLabels[step.action] || step.action.toUpperCase()}</div>
             <div class="sbs-step-rule">${step.rule.includes('\n') ? step.rule.split('\n').map(l => `<div>${l}</div>`).join('') : step.rule}</div>
@@ -1240,7 +1240,7 @@ function updateSbsControls() {
             }
             return displayRhs;
         });
-        
+
         // Include removed ghost rhs if needed
         if (step.action === 'removed' && lhs === step.targetLhs && !grammar[lhs].includes(step.targetRhs)) {
             rhsItems.push(`<span style="color:#ef4444;font-weight:700;text-decoration:line-through;opacity:0.6;">${step.targetRhs || '&epsilon;'}</span>`);
@@ -1251,7 +1251,7 @@ function updateSbsControls() {
             grammarLines.push(`<div>${lineHTML}</div>`);
         }
     }
-    
+
     // Ghost removed lhs entirely
     if (step.action === 'removed' && step.targetLhs && !grammar[step.targetLhs]) {
         grammarLines.push(`<div style="color:#ef4444;font-weight:700;text-decoration:line-through;opacity:0.6;"><span style="color:#ef4444;">${step.targetLhs}</span> &rarr; ${step.targetRhs || '&epsilon;'}</div>`);

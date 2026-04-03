@@ -235,7 +235,8 @@ D -> d"></textarea>
                         <h3>Dynamic Rule Builder</h3>
                         <div class="builder-description">
                             Automatically append rules to the text editor. Space out multiple RHS options with a pipe
-                            <code>|</code> or slash<code>/</code>[Lower Case characters will automatically be converted to Upper Case in the LHS].
+                            <code>|</code> or slash<code>/</code>[Lower Case characters will automatically be converted
+                            to Upper Case in the LHS].
                         </div>
                         <div class="builder-row">
                             <input type="text" id="builder-lhs" placeholder="LHS (e.g. S)" maxlength="1"
@@ -250,13 +251,16 @@ D -> d"></textarea>
                     </div>
                 </div>
 
-                <div class="panel-actions center-actions" style="border-top: none; padding-top: 0; gap: 2rem; flex-wrap: wrap;">
+                <div class="panel-actions center-actions"
+                    style="border-top: none; padding-top: 0; gap: 2rem; flex-wrap: wrap;">
                     <div class="action-card">
-                        <button class="btn btn-primary btn-large" id="btn-start" style="width: 100%;">Execute Simplification Pipeline</button>
+                        <button class="btn btn-primary btn-large" id="btn-start" style="width: 100%;">Execute
+                            Simplification Pipeline</button>
                         <p class="action-description">For people familiar with Context-Free Grammars (CFG)</p>
                     </div>
                     <div class="action-card">
-                        <button class="btn btn-primary btn-large" id="btn-step-by-step" style="width: 100%;">Step-by-Step Walkthrough</button>
+                        <button class="btn btn-primary btn-large" id="btn-step-by-step"
+                            style="width: 100%;">Step-by-Step Walkthrough</button>
                         <p class="action-description">For those who want to learn the entire process</p>
                     </div>
                 </div>
@@ -302,9 +306,9 @@ D -> d"></textarea>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#10b981;"></span>Start Symbol</div>
                                     <div class="legend-item"><span class="legend-dot"
-                                             style="background:#fbbf24;"></span>Nullable</div>
-                                     <div class="legend-item"><span class="legend-dot"
-                                             style="background:#10b981;"></span>Generated</div>
+                                            style="background:#fbbf24;"></span>Nullable</div>
+                                    <div class="legend-item"><span class="legend-dot"
+                                            style="background:#10b981;"></span>Generated</div>
                                     <div class="legend-item"><span class="legend-dot"
                                             style="background:#f87171;"></span>Removed</div>
                                     <div class="legend-item"><span class="legend-dot"
@@ -506,8 +510,7 @@ minimal and stable. A status banner will appear below to confirm.
                                     <h3 id="graph-stage-label" style="margin: 0; font-size: 1.5rem; color: #fff;">Stage
                                         0: Original Grammar</h3>
                                 </div>
-                                <button id="btn-auto-play" class="btn btn-primary"
-                                    style="width: 140px;">▶
+                                <button id="btn-auto-play" class="btn btn-primary" style="width: 140px;">▶
                                     Auto-Play</button>
                                 <button id="btn-next-graph" class="btn btn-secondary">Next ▶</button>
                             </div>
@@ -567,7 +570,8 @@ minimal and stable. A status banner will appear below to confirm.
                 </div>
                 <button id="btn-sbs-next" class="btn btn-secondary">Next</button>
                 <button id="btn-sbs-auto" class="btn btn-primary" style="min-width:100px;">Auto</button>
-                <button id="btn-sbs-exit" class="btn btn-secondary" style="border-color:var(--danger);color:var(--danger);">Exit</button>
+                <button id="btn-sbs-exit" class="btn btn-secondary"
+                    style="border-color:var(--danger);color:var(--danger);">Exit</button>
             </div>
 
             <div class="sbs-main">
@@ -575,7 +579,8 @@ minimal and stable. A status banner will appear below to confirm.
                     <div id="sbs-network" class="network-canvas"></div>
                     <div class="sbs-grammar-state">
                         <div class="sbs-grammar-header">Current Grammar State</div>
-                        <div id="sbs-grammar-content" class="sbs-grammar-content" style="font-family: 'Fira Code', monospace; font-size: 0.95rem; color: #fff;"></div>
+                        <div id="sbs-grammar-content" class="sbs-grammar-content"
+                            style="font-family: 'Fira Code', monospace; font-size: 0.95rem; color: #fff;"></div>
                     </div>
                 </div>
                 <div class="sbs-carousel-wrapper">
