@@ -1989,23 +1989,23 @@ html {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    max-height: 250px;
+    max-height: 350px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .sbs-grammar-header {
     font-family: 'Outfit', sans-serif;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #fff;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     border-bottom: 1px solid #222;
     padding-bottom: 8px;
 }
 
 .sbs-grammar-content {
     overflow-y: auto;
-    line-height: 1.6;
+    line-height: 1.8;
     scrollbar-width: thin;
     scrollbar-color: #444 transparent;
 }

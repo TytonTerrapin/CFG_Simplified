@@ -4,20 +4,20 @@
 
 // Color palette
 const C = {
-    emerald:     [16, 185, 129],
-    emeraldHex:  '#10b981',
-    navy:        '#1e293b',
-    darkText:    '#1e293b',
-    grayText:    '#64748b',
-    lightGray:   '#f1f5f9',
-    white:       '#ffffff',
-    red:         '#ef4444',
-    redBg:       '#fee2e2',
-    greenBg:     '#d1fae5',
-    blue:        '#3b82f6',
-    amber:       '#f59e0b',
+    emerald: [16, 185, 129],
+    emeraldHex: '#10b981',
+    navy: '#1e293b',
+    darkText: '#1e293b',
+    grayText: '#64748b',
+    lightGray: '#f1f5f9',
+    white: '#ffffff',
+    red: '#ef4444',
+    redBg: '#fee2e2',
+    greenBg: '#d1fae5',
+    blue: '#3b82f6',
+    amber: '#f59e0b',
     tableBorder: '#e2e8f0',
-    headerBg:    '#10b981',
+    headerBg: '#10b981',
 };
 
 // ASCII-safe arrow/symbol replacements for pdfmake's bundled Roboto subset

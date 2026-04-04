@@ -830,7 +830,7 @@ let sbsNetworkInstance = null;
 function flattenPipelineSteps() {
     const steps = [];
     let runningGrammar = deepCopy(pipelineHistory[0].grammar);
-    const STAGE_COLORS = { 1: '#10b981', 2: '#14b8a6', 3: '#f59e0b', 4: '#f43f5e' };
+    const STAGE_COLORS = { 1: '#10b981', 2: '#14b8a6', 3: '#f59e0b', 4: '#10b981' };
     const STAGE_NAMES = { 1: 'Null Productions', 2: 'Unit Productions', 3: 'Useless Symbols', 4: 'Validation Pass' };
     const STAGE_DESCS = {
         1: 'Nullable variables are identified and alternative productions are generated. Then all \u03b5-productions are removed.',
@@ -916,7 +916,7 @@ function flattenPipelineSteps() {
     }
 
     steps.push({
-        stage: 'Complete', stageIdx: 4, color: '#f43f5e', action: 'complete',
+        stage: 'Complete', stageIdx: 4, color: '#10b981', action: 'complete',
         title: 'Simplification Complete',
         rule: Object.keys(runningGrammar).map(k => `${k} \u2192 ${runningGrammar[k].map(r => r || '\u03b5').join(' | ')}`).join('\n'),
         reasoning: 'All null productions, unit productions, and useless symbols have been eliminated. The grammar is fully simplified and has passed the convergence validation pass.',
