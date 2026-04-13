@@ -770,4 +770,59 @@ function getCombinations(arr, k) {
     return results;
 }
 
-export { remove_null_productions, remove_unit_productions, remove_useless_symbols, _calculate_metrics, isUpper, getCombinations };
+// -----------------------------------------
+// 4. Grammar Membership Checker
+// -----------------------------------------
+function check_membership(grammar, target_string, start_symbol = 'S') {
+    if (target_string === '') {
+        if (grammar[start_symbol] && grammar[start_symbol].includes('')) {
+            return [start_symbol, 'ε'];
+        }
+        return false;
+    }
+
+    const queue = [{ current: start_symbol, path: [start_symbol] }];
+    const visited = new Set([start_symbol]);
+    
+    let iterations = 0;
+    const MAX_ITERATIONS = 50000;
+
+    while (queue.length > 0 && iterations < MAX_ITERATIONS) {
+        iterations++;
+        const node = queue.shift();
+        
+        if (node.current === target_string) {
+            return node.path;
+        }
+
+        let expanded = false;
+        for (let i = 0; i < node.current.length; i++) {
+            const char = node.current[i];
+            if (isUpper(char)) {
+                const pre = node.current.substring(0, i);
+                const post = node.current.substring(i + 1);
+                
+                if (grammar[char]) {
+                    for (const prod of grammar[char]) {
+                        if (prod === '') continue; 
+                        
+                        const next_str = pre + prod + post;
+                        
+                        if (next_str.length <= target_string.length) {
+                            if (!visited.has(next_str)) {
+                                visited.add(next_str);
+                                queue.push({ current: next_str, path: [...node.path, next_str] });
+                            }
+                        }
+                    }
+                }
+                expanded = true;
+                break;
+            }
+        }
+    }
+    
+    return false;
+}
+
+export { remove_null_productions, remove_unit_productions, remove_useless_symbols, _calculate_metrics, isUpper, getCombinations, check_membership };
