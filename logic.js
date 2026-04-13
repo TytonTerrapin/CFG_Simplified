@@ -56,7 +56,13 @@ function remove_null_productions(grammar) {
     // Initialize updatedGrammar with keys from workingGrammar
     for (const nt in workingGrammar) updatedGrammar[nt] = new Set();
 
-    for (const [non_terminal, productions] of Object.entries(workingGrammar)) {
+    const sortedEntries = Object.entries(workingGrammar).sort((a, b) => {
+        if (a[0] === 'S') return 1;
+        if (b[0] === 'S') return -1;
+        return 0;
+    });
+
+    for (const [non_terminal, productions] of sortedEntries) {
         for (const production of productions) {
             if (production === '') continue; // Skip epsilon
             
@@ -255,7 +261,13 @@ function remove_unit_productions(grammar) {
     const updatedGrammar = {};
     const rule_transformations = [];
 
-    for (const non_terminal in workingGrammar) {
+    const sortedNTs = Object.keys(workingGrammar).sort((a, b) => {
+        if (a === 'S') return 1;
+        if (b === 'S') return -1;
+        return 0;
+    });
+
+    for (const non_terminal of sortedNTs) {
         const current_new_prods = new Set();
         const transformation = {
             non_terminal: non_terminal,
@@ -546,7 +558,13 @@ function _phase1_remove_nonproductive(grammar) {
     const non_productive = new Set(Array.from(all_nts).filter(x => !productive.has(x)));
     
     const filteredGrammar = {};
-    for (const non_terminal in grammar) {
+    const sortedNTsPhase1 = Object.keys(grammar).sort((a, b) => {
+        if (a === 'S') return 1;
+        if (b === 'S') return -1;
+        return 0;
+    });
+
+    for (const non_terminal of sortedNTsPhase1) {
         if (!productive.has(non_terminal)) {
             continue;
         }

@@ -8,6 +8,7 @@ const DOM = {
     exampleSelect: document.getElementById('example-select'),
 
     btnAddRule: document.getElementById('btn-add-rule'),
+    btnAddEpsilon: document.getElementById('btn-add-epsilon'),
     builderLhs: document.getElementById('builder-lhs'),
     builderRhs: document.getElementById('builder-rhs'),
 
@@ -749,8 +750,32 @@ DOM.btnClear.addEventListener('click', () => {
 DOM.btnAddRule.addEventListener('click', () => {
     const lhs = DOM.builderLhs.value.trim().toUpperCase(), rhs = DOM.builderRhs.value.trim();
     if (!lhs || !rhs) return;
-    DOM.cfgInput.value += (DOM.cfgInput.value && !DOM.cfgInput.value.endsWith('\n') ? '\n' : '') + `${lhs} -> ${rhs}\n`;
+    
+    let lines = DOM.cfgInput.value.split('\n');
+    let found = false;
+    const regex = new RegExp("^" + lhs + "\\s*(->|=>|::=|:)(.*)");
+    for (let i = 0; i < lines.length; i++) {
+        if (regex.test(lines[i].trim())) {
+            lines[i] = lines[i].trim() + ' | ' + rhs;
+            found = true;
+            break;
+        }
+    }
+    
+    if (found) {
+        DOM.cfgInput.value = lines.join('\n');
+        if (!DOM.cfgInput.value.endsWith('\n')) DOM.cfgInput.value += '\n';
+    } else {
+        let currentVal = DOM.cfgInput.value;
+        DOM.cfgInput.value += (currentVal && !currentVal.endsWith('\n') ? '\n' : '') + `${lhs} -> ${rhs}\n`;
+    }
+
     DOM.builderLhs.value = ''; DOM.builderRhs.value = ''; DOM.builderLhs.focus();
+});
+
+DOM.btnAddEpsilon.addEventListener('click', () => {
+    DOM.builderRhs.value += (DOM.builderRhs.value.length > 0 && !DOM.builderRhs.value.endsWith(' ') && !DOM.builderRhs.value.endsWith('|') ? ' | ' : '') + 'ε';
+    DOM.builderRhs.focus();
 });
 
 // Playback

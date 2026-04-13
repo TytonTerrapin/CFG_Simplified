@@ -246,8 +246,9 @@ D -> d"></textarea>
                             <input type="text" id="builder-lhs" placeholder="LHS (e.g. S)" maxlength="1"
                                 class="builder-input lhs-input">
                             <span class="arrow-icon">→</span>
-                            <input type="text" id="builder-rhs" placeholder="RHS (e.g. aB | ?)"
+                            <input type="text" id="builder-rhs" placeholder="RHS (e.g. aB | ε)"
                                 class="builder-input rhs-input">
+                            <button type="button" class="btn btn-secondary" id="btn-add-epsilon" title="Insert Epsilon" style="padding: 0; min-width: 40px; font-weight: bold; font-size: 1.2rem; border-color: var(--feature-accent); color: var(--feature-accent); display: flex; align-items: center; justify-content: center;">ε</button>
                         </div>
                         <div class="builder-actions">
                             <button class="btn btn-secondary w-full" id="btn-add-rule">Add Rule to Editor</button>
@@ -258,14 +259,14 @@ D -> d"></textarea>
                 <div class="panel-actions center-actions"
                     style="border-top: none; padding-top: 0; gap: 2rem; flex-wrap: wrap;">
                     <div class="action-card">
-                        <button class="btn btn-primary btn-large" id="btn-start" style="width: 100%;">Execute
-                            Simplification Pipeline</button>
-                        <p class="action-description">For people familiar with Context-Free Grammars (CFG)</p>
-                    </div>
-                    <div class="action-card">
                         <button class="btn btn-primary btn-large" id="btn-step-by-step"
                             style="width: 100%;">Step-by-Step Walkthrough</button>
                         <p class="action-description">For those who want to learn the entire process</p>
+                    </div>
+                    <div class="action-card">
+                        <button class="btn btn-primary btn-large" id="btn-start" style="width: 100%;">Execute
+                            Simplification Pipeline</button>
+                        <p class="action-description">For people familiar with Context-Free Grammars (CFG)</p>
                     </div>
                 </div>
             </section>
